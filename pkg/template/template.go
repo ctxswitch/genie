@@ -3,31 +3,29 @@ package template
 import (
 	"strings"
 
-	"ctx.sh/dynamo/pkg/resources"
+	"ctx.sh/genie/pkg/resources"
 )
 
 type Template struct {
-	root      Root
-	resources *resources.Resources
+	root Root
+	// This could end up being any in the future
 	vars      map[string]string
+	resources *resources.Resources
 }
 
-func New() *Template {
-	return &Template{
-		vars: make(map[string]string),
-	}
+func NewTemplate() *Template {
+	return &Template{}
 }
 
 func (t *Template) Compile(input string) error {
-	p := NewParser(input).WithResources(t.resources)
-	root, err := p.Parse()
+	parser := NewParser(input, t.resources)
+	root, err := parser.Parse()
+	if err != nil {
+		return err
+	}
+
 	t.root = root
-
-	return err
-}
-
-func (t *Template) Execute() string {
-	return t.eval(t.root)
+	return nil
 }
 
 func (t *Template) WithResources(r *resources.Resources) *Template {
@@ -40,30 +38,27 @@ func (t *Template) WithVars(vars map[string]string) *Template {
 	return t
 }
 
+// Will we have any errors on execute?
+func (t *Template) Execute() string {
+	return t.eval(t.root)
+}
+
 func (t *Template) eval(root Root) string {
 	var out strings.Builder
 
 	for _, node := range root.Nodes {
 		switch n := node.(type) {
-		case TextNode:
-			out.WriteString(t.evalText(n))
-		case IdentifierExpressionNode:
-			out.WriteString(t.evalIdentifierExpression(n))
+		case *Text:
+			out.WriteString(n.String())
+		case *Comment:
+			// Do nothing right now, but I'm thinking that I want to potentially
+			// use those for log points.
+		case *Expression:
+			out.WriteString(n.WithVars(t.vars).String())
+		default:
+			out.WriteString(n.String())
 		}
 	}
 
 	return out.String()
-}
-
-func (t *Template) evalText(n TextNode) string {
-	return n.String()
-}
-
-func (t *Template) evalIdentifierExpression(n IdentifierExpressionNode) string {
-	if value, ok := t.vars[n.TokenLiteral()]; ok {
-		return value
-	}
-
-	// should I send an error, warning, or just an empty string?
-	return ""
 }

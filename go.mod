@@ -1,8 +1,8 @@
-module ctx.sh/dynamo
+module ctx.sh/genie
 
 go 1.20
 
-require github.com/stretchr/testify v1.8.2
+require github.com/stretchr/testify v1.8.4
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

@@ -1,73 +1,111 @@
 package template
 
 import (
-	"ctx.sh/dynamo/pkg/resources"
-	"ctx.sh/dynamo/pkg/template/token"
+	"ctx.sh/genie/pkg/filter"
+	"ctx.sh/genie/pkg/resources"
 )
 
 type Node interface {
-	TokenLiteral() string
+	Literal() string
 	String() string
 }
 
-type Text interface {
-	Node
-	Text()
+type Root struct {
+	Nodes []Node
 }
 
-type Statement interface {
+func NewRoot() Root {
+	return Root{
+		Nodes: make([]Node, 0),
+	}
+}
+
+func (n *Root) Length() int {
+	return len(n.Nodes)
+}
+
+type TextNode interface {
+	Node
+	TokenText()
+}
+
+type StatementNode interface {
 	Node
 	StatementNode()
+	WithVars(map[string]string) ExpressionNode
 }
 
-type Expression interface {
+type ExpressionNode interface {
 	Node
 	ExpressionNode()
+	Filter(string) string
+	WithVars(map[string]string) ExpressionNode
 }
 
-type Error interface {
-	Node
-	Error()
+type Control struct{}
+
+func (n *Control) Literal() string { return "-" }
+func (n *Control) String() string  { return "" }
+
+type Text struct {
+	Token Token
 }
 
-type Root struct {
-	Nodes []any
-}
+func (n *Text) Literal() string { return n.Token.Literal }
+func (n *Text) String() string  { return n.Token.Literal }
 
-func (r *Root) Length() int {
-	return len(r.Nodes)
-}
-
-type TextNode struct {
-	Token token.Token
-}
-
-func (t *TextNode) TokenLiteral() string { return t.Token.Literal }
-func (t *TextNode) String() string       { return t.Token.Literal }
-
-type IdentifierExpressionNode struct {
-	Token token.Token
-	// GlobalVars map[string]
-}
-
-func (i *IdentifierExpressionNode) TokenLiteral() string { return i.Token.Literal }
-func (i *IdentifierExpressionNode) String() string       { return i.Token.Literal }
-func (i *IdentifierExpressionNode) ExpressionNode()      {}
-
-type ResourceExpressionNode struct {
-	Token    token.Token
+// Think about coming back through here and removing the token requirements.
+// We don't actually need them for anything as the tokens are useless to us
+// other than looking at the type of the expression - and in that case we
+// just need to store the type.
+type Expression struct {
+	Token    Token
+	Name     string
 	Resource resources.Resource
+	Vars     map[string]string // This changes to any once we introduce
+	// more types.
+	Filter filter.FilterFunc
 }
 
-func (r *ResourceExpressionNode) TokenLiteral() string { return r.Token.Literal }
-func (r *ResourceExpressionNode) String() string       { return r.Resource.Get() }
-func (r *ResourceExpressionNode) ExpressionNode()      {}
+func (n *Expression) Literal() string { return n.Token.Literal }
+func (n *Expression) String() string {
+	var out string
+	var ok bool
+	switch n.Token.Type {
+	case TokenResource:
+		out = n.Resource.Get()
+	case TokenIdentifier:
+		if out, ok = n.Vars[n.Token.Literal]; !ok {
+			// This should change once we start checking for existence
+			// when parsing. i.e. we want to make sure it exists...
+			out = n.Token.Literal
+		}
 
-type LetStatementNode struct {
-	Token      token.Token
-	Expression Expression
+	default:
+		out = n.Token.Literal
+	}
+
+	return out
+}
+func (n *Expression) WithVars(vars map[string]string) *Expression { n.Vars = vars; return n }
+func (n *Expression) ExpressionNode()                             {}
+
+// Probably can consolidate this like we did with expression
+type LetStatement struct {
+	Token      Token
+	Expression ExpressionNode
+	Vars       map[string]string
 }
 
-func (l *LetStatementNode) TokenLiteral() string { return l.Token.Literal }
-func (l *LetStatementNode) String() string       { return l.Token.Literal }
-func (l *LetStatementNode) StatementNode()       {}
+func (n *LetStatement) Literal() string                               { return n.Token.Literal }
+func (n *LetStatement) String() string                                { return n.Token.Literal }
+func (n *LetStatement) WithVars(vars map[string]string) *LetStatement { n.Vars = vars; return n }
+func (n *LetStatement) StatementNode()                                {}
+
+// I'll convert this to allow for comments as logs later.
+type Comment struct {
+	Token Token
+}
+
+func (n *Comment) Literal() string { return n.Token.Literal }
+func (n *Comment) String() string  { return n.Token.Literal }

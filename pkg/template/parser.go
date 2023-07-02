@@ -1,202 +1,127 @@
 package template
 
 import (
-	"strings"
-
-	"ctx.sh/dynamo/pkg/resources"
-	"ctx.sh/dynamo/pkg/template/token"
+	"ctx.sh/genie/pkg/filter"
+	"ctx.sh/genie/pkg/resources"
 )
 
-// TODO: errors should be more descriptive, adding syntax information.
+type ParserFunc func() (Node, error)
 
 type Parser struct {
-	l *Lexer
-	e []error
+	l       *Lexer
+	parsers map[TokenType]ParserFunc
+	tokens  []Token
 
 	res  *resources.Resources
-	curr token.Token
-	peek token.Token
+	peek Token
+	curr Token
 }
 
-func NewParser(input string) *Parser {
+func NewParser(input string, res *resources.Resources) *Parser {
 	p := &Parser{
-		l: NewLexer(input),
-		e: make([]error, 0),
+		l:       NewLexer(input),
+		res:     res,
+		parsers: make(map[TokenType]ParserFunc),
 	}
 
+	p.registerParser(TokenText, p.parseText)
+	p.registerParser(TokenIdentifier, p.parseExpression)
+	p.registerParser(TokenString, p.parseExpression)
+	p.registerParser(TokenResource, p.parseExpression)
+	p.registerParser(TokenKeyword, p.parseStatement)
+	p.registerParser(TokenComment, p.parseComment)
+
 	p.nextToken()
 	p.nextToken()
 
-	return p
-}
-
-func (p *Parser) WithResources(r *resources.Resources) *Parser {
-	p.res = r
 	return p
 }
 
 func (p *Parser) Parse() (Root, error) {
-	root := Root{
-		Nodes: make([]any, 0),
-	}
+	root := NewRoot()
 
-	for p.curr.Type != token.EOF {
-		var node Node
-		switch p.curr.Type {
-		case token.Text:
-			node = p.parseText()
-		case token.ExpressionStart:
-			node = p.parseExpression()
-			if err := p.nextExpect(token.ExpressionEnd); err != nil {
-				p.addError(UnexpectedTokenError)
-				return root, err
-			}
-		case token.StatementStart:
-			node = p.parseStatement()
-			if err := p.nextExpect(token.StatementEnd); err != nil {
-				p.addError(UnexpectedTokenError)
-				return root, err
-			}
+	for p.curr.Type != TokenEOF {
+		fn, ok := p.parsers[p.curr.Type]
+		if !ok {
+			return Root{}, UnknownParserError
 		}
 
+		node, err := fn()
+		if err != nil {
+			return Root{}, err
+		}
 		root.Nodes = append(root.Nodes, node)
+
 		p.nextToken()
 	}
 
 	return root, nil
 }
 
-func (p *Parser) parseText() Node {
-	return &TextNode{
-		Token: p.curr,
-	}
+func (p *Parser) registerParser(t TokenType, fn ParserFunc) {
+	p.parsers[t] = fn
 }
 
-func (p *Parser) parseExpression() Expression {
-	p.nextToken()
-
-	switch p.curr.Type {
-	case token.Resource:
-		return p.parseResourceExpression()
-	case token.Identifier:
-		return p.parseIdentifierExpression()
-	default:
-		p.addError(UnexpectedTokenError)
-		return nil
-	}
+func (p *Parser) parseComment() (Node, error) {
+	return &Comment{Token: p.curr}, nil
 }
 
-func (p *Parser) parseResourceExpression() Expression {
-	resourceToken := p.curr
-
-	if err := p.nextExpect(token.Period); err != nil {
-		p.addError(UnexpectedTokenError)
-		return nil
-	}
-
-	if err := p.nextExpect(token.Identifier); err != nil {
-		p.addError(UnexpectedTokenError)
-		return nil
-	}
-
-	identifierToken := p.curr
-
-	resource, err := p.res.Get(resourceToken.Literal, p.curr.Literal)
-	if err != nil {
-		p.addError(err)
-		return nil
-	}
-
-	node := &ResourceExpressionNode{
-		Token:    identifierToken,
-		Resource: resource,
-	}
-
-	return node
+func (p *Parser) parseText() (Node, error) {
+	return &Text{Token: p.curr}, nil
 }
 
-func (p *Parser) parseIdentifierExpression() Expression {
-	node := &IdentifierExpressionNode{
-		Token: p.curr,
+func (p *Parser) parseExpression() (Node, error) {
+	var fn filter.FilterFunc
+
+	tok := p.curr
+	e := &Expression{Token: tok}
+
+	switch tok.Type {
+	case TokenResource:
+		rtype := p.curr.Literal
+		if err := p.nextExpect(TokenPeriod, TokenIdentifier); err != nil {
+			return nil, SyntaxError
+		}
+
+		r, err := p.res.Get(rtype, p.curr.Literal)
+		if err != nil {
+			return nil, UnknownResourceError
+		}
+		e.Resource = r
 	}
 
-	return node
+	if err := p.nextExpect(TokenPipe, TokenFilter); err == nil {
+		if fn, err = filter.Lookup(p.curr.Literal); err != nil {
+			return nil, InternalError
+		}
+		e.Filter = fn
+	}
+
+	// Probably just need to switch here based on type?
+	return e, nil
 }
 
-func (p *Parser) parseStatement() Node {
-	p.nextToken()
-
-	switch p.curr.Type {
-	case token.Keyword:
-		return p.parseKeywordStatement()
-	default:
-		p.addError(UnexpectedTokenError)
-		return nil
-	}
-}
-
-func (p *Parser) parseKeywordStatement() Node {
-	switch p.curr.Literal {
-	case "let":
-		return p.parseLetKeywordStatement()
-	default:
-		p.addError(UnknownKeyword)
-		return nil
-	}
-}
-
-func (p *Parser) parseLetKeywordStatement() Node {
-	p.nextExpect()
-
-	if err := p.nextExpect(token.Identifier); err != nil {
-		p.addError(UnexpectedTokenError)
-		return nil
-	}
-
-	identifier := p.curr
-
-	if err := p.nextExpect(token.Equals); err != nil {
-		p.addError(UnexpectedTokenError)
-		return nil
-	}
-
-	exp := p.parseExpression()
-
-	node := &LetStatementNode{Token: identifier, Expression: exp}
-
-	return node
+func (p *Parser) parseStatement() (Node, error) {
+	// Probably just need to switch here based on type?
+	return &LetStatement{}, nil
 }
 
 func (p *Parser) nextToken() {
 	p.curr = p.peek
-	p.peek = p.l.NextToken()
+	p.peek = p.l.Next()
 }
 
-func (p *Parser) nextExpect(expected ...token.Type) error {
+func (p *Parser) nextExpect(expected ...TokenType) error {
 	for _, ex := range expected {
-		if ex == p.peek.Type {
-			p.nextToken()
-			return nil
+		if ex != p.peek.Type {
+			return UnexpectedTokenError
 		}
+
+		p.nextToken()
 	}
 
-	return UnexpectedTokenError
+	return nil
 }
 
-func (p *Parser) addError(err error) {
-	p.e = append(p.e, err)
-}
-
-func (p *Parser) IsError() bool {
-	return len(p.e) > 0
-}
-
-func (p *Parser) Error() string {
-	var builder strings.Builder
-	for _, err := range p.e {
-		builder.WriteString(err.Error())
-		builder.WriteByte('\n')
-	}
-
-	return builder.String()
-}
+// Once whitespace control gets back in here, we need to be able to move forward and
+// backward either before or after the delimiter.

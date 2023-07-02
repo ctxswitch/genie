@@ -1,65 +1,60 @@
 package template
 
 import (
+	"reflect"
+	"runtime"
 	"testing"
 
-	"ctx.sh/dynamo/pkg/resources"
-	"ctx.sh/dynamo/pkg/template/token"
+	"ctx.sh/genie/pkg/filter"
+	"ctx.sh/genie/pkg/resources"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
-
-var mockResource = resources.MockResources()
 
 func TestParse(t *testing.T) {
 	tests := []struct {
 		input    string
-		err      bool
-		expected []any
+		expected []Node
 	}{
-		{"hello world", false, []any{
-			&TextNode{token.Token{Type: token.Text, Literal: "hello world"}},
-		}},
-		{"{{ name }}", false, []any{
-			&IdentifierExpressionNode{token.Token{Type: token.Identifier, Literal: "name"}},
-		}},
-		{"{{ list.name }}", false, []any{
-			&ResourceExpressionNode{
-				token.Token{Type: token.Identifier, Literal: "name"},
-				mockResource.MustGet("list", "name"),
+		{`<# Comment #>`, []Node{
+			&Comment{
+				NewToken(TokenComment, "Comment"),
 			},
 		}},
-		{"{{ list.name", true, []any{}},
-		// TODO: This should error, but right now it's just treated as text.
-		{"list.name }}", false, []any{
-			&TextNode{token.Token{Type: token.Text, Literal: "list.name }}"}},
+		{`<< name >>`, []Node{
+			&Expression{
+				Token: NewToken(TokenIdentifier, "name"),
+			},
 		}},
-		{"{% let name = list.name %}", false, []any{
-			&LetStatementNode{
-				Token: token.Token{Type: token.Identifier, Literal: "name"},
-				Expression: &ResourceExpressionNode{
-					token.Token{Type: token.Identifier, Literal: "name"},
-					mockResource.MustGet("list", "name"),
-				},
-			}},
-		},
-		{"{%let other_name = name %}", false, []any{
-			&LetStatementNode{
-				Token: token.Token{Type: token.Identifier, Literal: "other_name"},
-				Expression: &IdentifierExpressionNode{
-					token.Token{Type: token.Identifier, Literal: "name"},
-				},
+		{`<< name | capitalize >>`, []Node{
+			&Expression{
+				Token:  NewToken(TokenIdentifier, "name"),
+				Filter: filter.Capitalize,
+			},
+		}},
+		{`<< list.name >>`, []Node{
+			&Expression{
+				Token:    NewToken(TokenResource, "list"),
+				Resource: resources.MockResources().MustGet("list", "name"),
 			},
 		}},
 	}
 
 	for i, tt := range tests {
-		parser := NewParser(tt.input).WithResources(resources.MockResources())
-		root, err := parser.Parse()
-		if tt.err {
-			assert.Error(t, err, "test[%d]: error expected but not encountered", i)
-		} else {
-			assert.NoError(t, err, "test[%d]: %s", i, err)
+		root, err := NewParser(tt.input, resources.MockResources()).Parse()
+		require.NoError(t, err)
+		require.Len(t, tt.expected, root.Length())
+		for j, exp := range tt.expected {
+			switch n := exp.(type) {
+			case *Expression:
+				got := root.Nodes[j].(*Expression)
+				assert.EqualValues(t, n.Token, got.Token, "test[%d]: %s", i, tt.input)
+				assert.EqualValues(t, n.Resource, got.Resource, "test[%d]: %s", i, tt.input)
+				// Get around the inability for testify to compare function pointers.
+				fn1 := runtime.FuncForPC(reflect.ValueOf(n.Filter).Pointer()).Name()
+				fn2 := runtime.FuncForPC(reflect.ValueOf(got.Filter).Pointer()).Name()
+				assert.Equal(t, fn1, fn2)
+			}
 		}
-		assert.EqualValues(t, tt.expected, root.Nodes, "test[%d]: %s", i, parser.Error())
 	}
 }
