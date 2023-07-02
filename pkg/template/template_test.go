@@ -17,7 +17,6 @@ Hello World
 << "Pam Beesly" >>
 
 << list.greeting >> World!
-<% minimize %>this that and the << other >><% endminimize %>
 `
 	expected = `
 
@@ -29,6 +28,9 @@ Pam Beesly
 Hello World!
 `
 )
+
+// <% minimize %>this that and the << other >><% endminimize %>
+// treat these as global filters?
 
 func TestTemplateParse(t *testing.T) {
 	var err error
