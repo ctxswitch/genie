@@ -70,58 +70,10 @@ func TokenLookup(literal string) Token {
 	return NewToken(TokenIdentifier, literal)
 }
 
-// func (t *Token) WithControl(cntl ControlType) Token {
-// 	t.Control = cntl
-// 	return t
-// }
+func (t *Token) WithMetadata(l *Lexer) *Token {
+	t.line = l.line
+	t.col = l.col
+	t.file = ""
 
-// func (t *Token) WithMetadata(l *Lexer) *Token {
-// 	t.line = l.line
-// 	t.col = l.col
-// 	t.file = l.file
-
-// 	return t
-// }
-
-// func (t *Token) Append(tok *Token) *Token {
-// 	// Since we are the only ones using this we should be able
-// 	// to ensure that we always pass the last token in the chain,
-// 	// but just to be sure, fast forward.
-// 	last := t.Last()
-// 	last.next = tok
-// 	// Now fast forward to the last of the token chain we
-// 	// just added.
-// 	return t.Last()
-// }
-
-// func (t *Token) Next() *Token {
-// 	if t.next != nil {
-// 		return t.next
-// 	}
-
-// 	return nil
-// }
-
-// func (t *Token) Prev() *Token {
-// 	if t.prev != nil {
-// 		return t.prev
-// 	}
-
-// 	return nil
-// }
-
-// func (t *Token) First() *Token {
-// 	tok := t
-// 	for tok.prev != nil {
-// 		tok = tok.prev
-// 	}
-// 	return tok
-// }
-
-// func (t *Token) Last() *Token {
-// 	tok := t
-// 	for tok.next != nil {
-// 		tok = tok.next
-// 	}
-// 	return tok
-// }
+	return t
+}

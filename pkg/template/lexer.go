@@ -11,7 +11,7 @@ type Lexer struct {
 	ch    byte
 
 	// Track metadata while scanning
-	file string
+	// file string
 	line int
 	col  int
 
@@ -34,76 +34,10 @@ func NewLexer(input string) *Lexer {
 	l.registerScanner(StatementMode, l.scanStatement)
 	l.registerScanner(CommentMode, l.scanComment)
 	l.registerScanner(RawMode, l.scanRaw)
+
 	l.readByte()
 	return l
 }
-
-// func (l *Lexer) Scan() ([]Token, error) {
-// 	tokens := make([]Token, 0)
-
-// 	for l.index < len(l.input) {
-// 		delim := l.peekDelimiter()
-// 		switch delim {
-// 		// I think we should move the token scanning to the scanners
-// 		case "<<":
-// 			l.shift(2)
-// 			l.state.Start(ExpressionMode)
-// 			l.skipWhitespace()
-// 		case ">>":
-// 			l.shift(2)
-// 			if err := l.state.End(ExpressionMode); err != nil {
-// 				return TokenizedError(delim), InvalidDelimiterCloseError
-// 			}
-// 			continue
-// 		case "<%":
-// 			l.shift(2)
-// 			l.state.Start(StatementMode)
-// 			l.skipWhitespace()
-// 		case "%>":
-// 			l.shift(2)
-// 			if err := l.state.End(StatementMode); err != nil {
-// 				return TokenizedError(delim), InvalidDelimiterCloseError
-// 			}
-// 			continue
-// 		case "<*":
-// 			l.shift(2)
-// 			l.state.Start(RawMode)
-// 		case "*>":
-// 			l.shift(2)
-// 			if err := l.state.End(RawMode); err != nil {
-// 				return TokenizedError(delim), InvalidDelimiterCloseError
-// 			}
-// 			continue
-// 		case "<#":
-// 			l.shift(2)
-// 			l.state.Start(CommentMode)
-// 		case "#>":
-// 			l.shift(2)
-// 			if err := l.state.End(CommentMode); err != nil {
-// 				return TokenizedError(delim), InvalidDelimiterCloseError
-// 			}
-// 			continue
-// 		}
-
-// 		mode := l.state.Mode()
-// 		fn, ok := l.scanner[mode]
-// 		if !ok {
-// 			return TokenizedError(string(mode)), InternalError
-// 		}
-
-// 		tok, err := fn()
-// 		if err != nil {
-// 			return []Token{tok}, err
-// 		}
-// 		tokens = append(tokens, tok)
-// 	}
-
-// 	// if we still have stuff on the state stack we need to return a
-// 	// close error.
-// 	tokens = append(tokens, NewToken(TokenEOF, "EOF"))
-
-// 	return tokens, nil
-// }
 
 // Come back through and get rid of recursion
 func (l *Lexer) Next() Token {
@@ -117,15 +51,7 @@ func (l *Lexer) Next() Token {
 	case "<<":
 		l.shift(2)
 		l.state.Start(ExpressionMode)
-		if l.ch == '-' {
-			l.readByte()
-			l.skipWhitespace()
-			return NewToken(TokenLStrip, "-")
-		}
 		l.skipWhitespace()
-	case "->":
-		l.readByte()
-		return NewToken(TokenTrim, "-")
 	case ">>":
 		l.shift(2)
 		if err := l.state.End(ExpressionMode); err != nil {
@@ -138,6 +64,10 @@ func (l *Lexer) Next() Token {
 		l.skipWhitespace()
 	case "%>":
 		l.shift(2)
+		// Automatically trim
+		if l.ch == '\n' {
+			l.readByte()
+		}
 		if err := l.state.End(StatementMode); err != nil {
 			return NewToken(TokenError, delim)
 		}
@@ -147,6 +77,10 @@ func (l *Lexer) Next() Token {
 		l.state.Start(RawMode)
 	case "*>":
 		l.shift(2)
+		// Automatically trim
+		if l.ch == '\n' {
+			l.readByte()
+		}
 		if err := l.state.End(RawMode); err != nil {
 			return NewToken(TokenError, delim)
 		}
@@ -156,6 +90,10 @@ func (l *Lexer) Next() Token {
 		l.state.Start(CommentMode)
 	case "#>":
 		l.shift(2)
+		// Automatically trim
+		if l.ch == '\n' {
+			l.readByte()
+		}
 		if err := l.state.End(CommentMode); err != nil {
 			return NewToken(TokenError, delim)
 		}

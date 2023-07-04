@@ -133,13 +133,6 @@ func TestScan(t *testing.T) {
 			NewToken(TokenText, "Hello "),
 			NewToken(TokenIdentifier, "name"),
 		}},
-
-		// Whitespace control
-		{`<<- name ->>`, []Token{
-			NewToken(TokenLStrip, "-"),
-			NewToken(TokenIdentifier, "name"),
-			NewToken(TokenTrim, "-"),
-		}},
 	}
 
 	for _, tt := range tests {

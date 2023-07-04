@@ -54,7 +54,11 @@ func (t *Template) eval(root Root) string {
 			// Do nothing right now, but I'm thinking that I want to potentially
 			// use those for log points.
 		case *Expression:
-			out.WriteString(n.WithVars(t.vars).String())
+			s := n.WithVars(t.vars).String()
+			if n.Filter != nil {
+				s = n.Filter(s)
+			}
+			out.WriteString(s)
 		default:
 			out.WriteString(n.String())
 		}

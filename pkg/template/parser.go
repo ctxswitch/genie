@@ -10,7 +10,6 @@ type ParserFunc func() (Node, error)
 type Parser struct {
 	l       *Lexer
 	parsers map[TokenType]ParserFunc
-	tokens  []Token
 
 	res  *resources.Resources
 	peek Token
@@ -45,13 +44,17 @@ func (p *Parser) Parse() (Root, error) {
 		if !ok {
 			return Root{}, UnknownParserError
 		}
-
 		node, err := fn()
 		if err != nil {
 			return Root{}, err
 		}
-		root.Nodes = append(root.Nodes, node)
 
+		// In certain cases, such as the whitespace control tokens, the node
+		// is ignored and will return nil after the next node to be processed
+		// is mutated.
+		if node != nil {
+			root.Nodes = append(root.Nodes, node)
+		}
 		p.nextToken()
 	}
 

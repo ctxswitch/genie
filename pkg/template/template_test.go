@@ -17,15 +17,16 @@ Hello World
 << "Pam Beesly" >>
 
 << list.greeting >> World!
+<< list.greeting | capitalize >> World!
 `
 	expected = `
-
 Hello World
 Dwight Schrute
 Jim Halpert
 Pam Beesly
 
 Hello World!
+HELLO World!
 `
 )
 

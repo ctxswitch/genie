@@ -106,3 +106,11 @@ Tomorrow:
 Get let wired up, redo the whitespace control tokens.
 I just finished up a rudimentary delim identifier (should refactor) but there is an
 infinite loop
+
+Requirements
+- The functions will need to modify text during runtime since there can be dynamic data between the function blocks.  This is a bit of a performance hit but I think we are ok for now.  We can refactor for performance later.  These functions are applied during template execution.
+- Treat lstrip and trim as functions that are wrapped around a text block.
+- I need to delimit text blocks per line.  It will make it easy to wrap them.
+
+Question? Why wouldn't we just enable trim by default and get rid of lshift?  Seems like we wouldn't really care about whitespace control with what we want to do.  It never really made sense in the templates anyway except that you ended up with values all spread out...
+  - to remove this behavior, we'd just skip a single new line after the block close if it exists, then there's nothing else to do.  lshift just seems pretty ineffective at this point.
