@@ -38,7 +38,6 @@ type StatementNode interface {
 type ExpressionNode interface {
 	Node
 	ExpressionNode()
-	Filter(string) string
 	WithVars(map[string]string) ExpressionNode
 }
 
@@ -87,12 +86,13 @@ func (n *Expression) String() string {
 
 	return out
 }
-func (n *Expression) WithVars(vars map[string]string) *Expression { n.Vars = vars; return n }
-func (n *Expression) ExpressionNode()                             {}
+func (n *Expression) WithVars(vars map[string]string) ExpressionNode { n.Vars = vars; return n }
+func (n *Expression) ExpressionNode()                                {}
 
 // Probably can consolidate this like we did with expression
 type LetStatement struct {
 	Token      Token
+	Identifier string
 	Expression ExpressionNode
 	Vars       map[string]string
 }

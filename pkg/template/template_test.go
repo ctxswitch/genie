@@ -18,6 +18,8 @@ Hello World
 
 << list.greeting >> World!
 << list.greeting | capitalize >> World!
+<% let greeting = list.greeting %><< greeting >> World!
+<% let greeting = list.greeting | capitalize %><< greeting >> World!
 `
 	expected = `
 Hello World
@@ -25,6 +27,8 @@ Dwight Schrute
 Jim Halpert
 Pam Beesly
 
+Hello World!
+HELLO World!
 Hello World!
 HELLO World!
 `

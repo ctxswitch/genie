@@ -38,6 +38,16 @@ func TestParse(t *testing.T) {
 				Resource: resources.MockResources().MustGet("list", "name"),
 			},
 		}},
+		{`<% let name = list.name %>`, []Node{
+			&LetStatement{
+				Token:      NewToken(TokenKeyword, "let"),
+				Identifier: "name",
+				Expression: &Expression{
+					Token:    NewToken(TokenResource, "list"),
+					Resource: resources.MockResources().MustGet("list", "name"),
+				},
+			},
+		}},
 	}
 
 	for i, tt := range tests {

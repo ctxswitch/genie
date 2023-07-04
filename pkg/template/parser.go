@@ -106,7 +106,27 @@ func (p *Parser) parseExpression() (Node, error) {
 
 func (p *Parser) parseStatement() (Node, error) {
 	// Probably just need to switch here based on type?
-	return &LetStatement{}, nil
+	tok := p.curr
+	switch p.curr.Literal {
+	case "let":
+		if err := p.nextExpect(TokenIdentifier); err != nil {
+			return nil, Error("identifier")
+		}
+		id := p.curr.Literal
+
+		if err := p.nextExpect(TokenEquals); err != nil {
+			return nil, Error("equals")
+		}
+
+		p.nextToken()
+
+		expNode, err := p.parseExpression()
+		if err != nil {
+			return nil, err
+		}
+		return &LetStatement{Token: tok, Identifier: id, Expression: expNode.(ExpressionNode)}, nil
+	}
+	return nil, InternalError
 }
 
 func (p *Parser) nextToken() {

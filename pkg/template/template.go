@@ -59,6 +59,13 @@ func (t *Template) eval(root Root) string {
 				s = n.Filter(s)
 			}
 			out.WriteString(s)
+		case *LetStatement:
+			exp := n.Expression.(*Expression)
+			e := exp.WithVars(t.vars).String()
+			if exp.Filter != nil {
+				e = exp.Filter(e)
+			}
+			t.vars[n.Identifier] = e
 		default:
 			out.WriteString(n.String())
 		}
