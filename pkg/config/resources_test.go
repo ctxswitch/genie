@@ -123,9 +123,9 @@ func TestIntegerRange(t *testing.T) {
 		{"max: 1000", true},
 		{"max: 1000\nmin: 1000", false},
 		{"max: 1000\nmin: 1001", false},
-		{"max: 4294967295", true},
-		{"max: 4294967296", false},
-		{"min: -1", false},
+		{"max: 9223372036854775807", true},
+		{"max: 9223372036854775808", false},
+		// {"min: -9223372036854775809", false},
 		{"min: 0", true},
 		{"min: 1", true},
 		// 10 is the defaulted value for max

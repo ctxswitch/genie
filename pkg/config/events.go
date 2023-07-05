@@ -2,15 +2,20 @@ package config
 
 import "fmt"
 
+type Var struct {
+	Name  string `yaml:"name"`
+	Value string `yaml:"value"`
+}
+
 type Event struct {
-	Generators int               `yaml:"generators"`
-	Vars       map[string]string `yaml:"vars"`
-	Filename   string            `yaml:"filename"`
-	Raw        string            `yaml:"raw"`
+	Generators int    `yaml:"generators"`
+	Vars       []Var  `yaml:"vars"`
+	Template   string `yaml:"template"`
+	Raw        string `yaml:"raw"`
 }
 
 func (e *Event) validate() (bool, error) {
-	if e.Filename != "" && e.Raw != "" {
+	if e.Template != "" && e.Raw != "" {
 		return false, fmt.Errorf("Template and raw are mutually exclusive options")
 	}
 	return true, nil
@@ -22,7 +27,6 @@ func (e *Event) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type EventDefaulted Event
 	var defaults = EventDefaulted{
 		Generators: 1,
-		Vars:       make(map[string]string),
 	}
 
 	out := defaults

@@ -30,7 +30,8 @@ type IntegerRange struct {
 }
 
 func (i *IntegerRange) validate() (bool, error) {
-	if i.Max < 1 || i.Max <= i.Min {
+	// Fix me now that we allow negative values
+	if i.Max <= i.Min {
 		return false, fmt.Errorf("max (%d) in integer_range must be greater than zero and the minimum value", i.Max)
 	}
 
