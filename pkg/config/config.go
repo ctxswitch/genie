@@ -15,18 +15,20 @@ type Configs struct {
 	Events    map[string]Event `yaml:"events"`
 	Resources Resources        `yaml:"resources"`
 	Sinks     Sinks            `yaml:"sinks"`
-
-	templates map[string]string
 }
 
 func LoadAll(dir string) (*Configs, error) {
 	configs := &Configs{}
 
-	if err := configs.readTemplates("./genie.d"); err != nil {
+	// Fix me to add custom directories.  At the very least, I want to split out templates
+	// from normal config. Not sure about the others.
+	templates, err := configs.readTemplates(dir)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := configs.readConfigs("./genie.d"); err != nil {
+	// Fix me to add custom directories.
+	if err := configs.readConfigs(dir); err != nil {
 		return nil, err
 	}
 
@@ -35,8 +37,8 @@ func LoadAll(dir string) (*Configs, error) {
 			continue
 		}
 
-		if tmpl, ok := configs.templates[event.Filename]; !ok {
-			return nil, fmt.Errorf("requested template does not exist: %s\n%v", event.Filename, configs.listTemplates())
+		if tmpl, ok := templates[event.Filename]; !ok {
+			return nil, fmt.Errorf("requested template does not exist: %s\n%v", event.Filename, configs.listKeys(templates))
 		} else {
 			event.Raw = tmpl
 		}
@@ -45,9 +47,9 @@ func LoadAll(dir string) (*Configs, error) {
 	return configs, nil
 }
 
-func (c *Configs) listTemplates() string {
+func (c *Configs) listKeys(m map[string]string) string {
 	list := make([]string, 0)
-	for n, _ := range c.templates {
+	for n := range m {
 		list = append(list, n)
 	}
 
@@ -75,20 +77,21 @@ func (c *Configs) readConfigs(dir string) error {
 	return nil
 }
 
-func (c *Configs) readTemplates(dir string) error {
-	if c.templates == nil {
-		c.templates = make(map[string]string)
+func (c *Configs) readTemplates(dir string) (map[string]string, error) {
+	templates := make(map[string]string)
+	if templates == nil {
+		templates = make(map[string]string)
 	}
 
 	files, _ := filepath.Glob(fmt.Sprintf("%s/*.tmpl", dir))
 	for _, file := range files {
 		data, err := os.ReadFile(file)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
-		c.templates[file] = string(data)
+		templates[file] = string(data)
 	}
 
-	return nil
+	return templates, nil
 }
