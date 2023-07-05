@@ -23,9 +23,9 @@ type Resources struct {
 // range has a minimum and maximum.  It also can be controlled by defining the step,
 // and leading zero padding.
 type IntegerRange struct {
-	Min  uint32 `yaml:"min"`
-	Max  uint32 `yaml:"max"`
-	Step uint32 `yaml:"step"`
+	Min  int64  `yaml:"min"`
+	Max  int64  `yaml:"max"`
+	Step int64  `yaml:"step"`
 	Pad  uint32 `yaml:"pad"`
 }
 

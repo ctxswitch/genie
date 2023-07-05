@@ -1,34 +1,19 @@
 package config
 
-type EventOptions struct {
-	Tags     map[string]string `yaml:"tags"`
-	Source   string            `yaml:"source"`
-	Template string            `yaml:"template"`
-	Payload  string            `yaml:"payload"`
-}
-
-// func (e *EventOptions) UnmarshalYAML(unmarshal func(interface{}) error) error {
-// 	type RawEventOptions EventOptions
-
-// 	var str string
-// 	if err := unmarshal(&str); err == nil {
-// 		e.Raw = str
-// 		return nil
-// 	}
-
-// 	var out RawEventOptions
-// 	if err := unmarshal(&out); err != nil {
-// 		return err
-// 	}
-
-// 	*e = EventOptions(out)
-// 	return nil
-// }
+import "fmt"
 
 type Event struct {
-	Count string            `yaml:"count"`
-	Vars  map[string]string `yaml:"vars"`
-	Event EventOptions      `yaml:"event"`
+	Generators int               `yaml:"generators"`
+	Vars       map[string]string `yaml:"vars"`
+	Template   string            `yaml:"template"`
+	Raw        string            `yaml:"raw"`
+}
+
+func (e *Event) validate() (bool, error) {
+	if e.Template != "" && e.Raw != "" {
+		return false, fmt.Errorf("Template and raw are mutually exclusive options")
+	}
+	return true, nil
 }
 
 // UnmarshalYAML sets the Event defaults and parses an event block. The
@@ -36,8 +21,8 @@ type Event struct {
 func (e *Event) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type EventDefaulted Event
 	var defaults = EventDefaulted{
-		Count: "1",
-		Vars:  make(map[string]string),
+		Generators: 1,
+		Vars:       make(map[string]string),
 	}
 
 	out := defaults
@@ -45,6 +30,11 @@ func (e *Event) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
-	*e = Event(out)
+	tmpl := Event(out)
+	if valid, err := e.validate(); !valid {
+		return err
+	}
+
+	*e = tmpl
 	return nil
 }

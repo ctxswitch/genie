@@ -11,8 +11,34 @@ type Sinks struct {
 }
 
 type HttpHeader struct {
-	Name  string
-	Value string
+	Name     string
+	Value    string
+	Resource string
+}
+
+func (h *HttpHeader) validate() (bool, error) {
+	if h.Resource != "" && h.Value != "" {
+		return false, fmt.Errorf("Resource and value are exclusive")
+	}
+	return true, nil
+}
+
+func (h *HttpHeader) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type HttpHeaderDefaulted HttpHeader
+	var defaults = HttpHeaderDefaulted{}
+
+	out := defaults
+	if err := unmarshal(&out); err != nil {
+		return err
+	}
+
+	tmpl := HttpHeader(out)
+	if valid, err := tmpl.validate(); !valid {
+		return err
+	}
+
+	*h = tmpl
+	return nil
 }
 
 // A sink of type "HTTP"; i.e., an HttpSink.

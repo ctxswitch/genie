@@ -1,7 +1,0 @@
-events:
-  planet_logs:
-    generators: 1
-    vars:
-      - name: version
-        value: v1
-    template: planet_logs.tmpl
