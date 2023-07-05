@@ -5,12 +5,12 @@ import "fmt"
 type Event struct {
 	Generators int               `yaml:"generators"`
 	Vars       map[string]string `yaml:"vars"`
-	Template   string            `yaml:"template"`
+	Filename   string            `yaml:"filename"`
 	Raw        string            `yaml:"raw"`
 }
 
 func (e *Event) validate() (bool, error) {
-	if e.Template != "" && e.Raw != "" {
+	if e.Filename != "" && e.Raw != "" {
 		return false, fmt.Errorf("Template and raw are mutually exclusive options")
 	}
 	return true, nil
