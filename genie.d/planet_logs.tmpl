@@ -1,0 +1,26 @@
+<% let planet = list.planets %>
+{
+  "message": "<<list.messages>>",
+  "aws_az": "<<list.aws_region>><<list.aws_zone>>",
+  "aws_region": "<<list.aws_region>>",
+  "container": {
+    "id":"<<random_string.container_id>>",
+    "name":"<<list.left_names>>-<<list.right_names>>"
+  },
+  "host": "<<planet>>-main-<<random_string.host_id>>",
+  "k8s": {
+    "arch":"<<list.arch>>",
+    "node":"ip-<<integer_range.octet>>-<<integer_range.octet>>-<<integer_range.octet>>-<<integer_range.octet>>.ec2.internal",
+    "pod":"<<planet>>-main-<<random_string.ten>>-<<random_string.five>>"
+  },
+  "log_level": "<<list.log_levels>>",
+  "service": "<<planet>>",
+  "service_instance": "<<environment>>",
+  "ts":"<<timestamp.now_unix>>",
+  "<<planet>>":{
+    "request_id":"<<uuid.request_uuid>>",
+    "duration":"<<integer_range.duration>>",
+    "method":"<<list.method>>",
+    "path":"<<list.path>>"
+  }
+}

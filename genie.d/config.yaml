@@ -1,0 +1,30 @@
+paths:
+  resources_dir: ./genie.d
+  events_dir: ./genie.d
+  sinks_dir: ./genie.d
+  templates_dir: ./genie.d
+sinks:
+  http:
+    inlet:
+      url: http://localhost
+      headers:
+        - name: Content-Type
+          value: application/json
+        - name: X-Genie-Version
+          value: v1
+        - name: X-Event-Type
+          value: logging
+        - name: X-Request-Id
+          resource: uuid.request_uuid
+events:
+  planet_logs:
+    generators: 1
+    vars:
+      - name: version
+        value: v1
+    template: planet_logs.tmpl
+  raw_logs:
+    generators: 1
+    raw: >
+      <% let greeting = "hello" %>
+      << greeting >> world!
