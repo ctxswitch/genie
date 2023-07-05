@@ -10,6 +10,7 @@ type Resources struct {
 	randomStrings map[string]Resource
 	uuids         map[string]Resource
 	timestamps    map[string]Resource
+	maps          map[string]Resource
 }
 
 func NewResources() *Resources {
@@ -19,6 +20,7 @@ func NewResources() *Resources {
 		randomStrings: make(map[string]Resource),
 		uuids:         make(map[string]Resource),
 		timestamps:    make(map[string]Resource),
+		maps:          make(map[string]Resource),
 	}
 }
 
@@ -34,6 +36,8 @@ func (r *Resources) Get(rtype string, name string) (Resource, error) {
 		return r.GetUuid(name)
 	case "timestamp":
 		return r.GetTimestamp(name)
+	case "map":
+		return r.GetMap(name)
 	default:
 		return nil, InvalidResourceTypeError
 	}
@@ -82,6 +86,14 @@ func (r *Resources) GetUuid(name string) (Resource, error) {
 
 func (r *Resources) GetTimestamp(name string) (Resource, error) {
 	if resource, ok := r.timestamps[name]; ok {
+		return resource, nil
+	}
+
+	return nil, NotFoundError
+}
+
+func (r *Resources) GetMap(name string) (Resource, error) {
+	if resource, ok := r.maps[name]; ok {
 		return resource, nil
 	}
 

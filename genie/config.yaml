@@ -1,0 +1,6 @@
+genie:
+  config_dir: ./genie
+  resources_dir: genie/resources.d
+  events_dir: genie/events.d
+  sinks_dir: genie/sinks.d
+  templates_dir: genie/templates.d
