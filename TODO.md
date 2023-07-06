@@ -13,6 +13,7 @@
 
 * [] Implement map to json transformer
 
+* [] Sinks can be defined for each event
 * [] Implement http sinks
 * [] Implement kafka sink
 

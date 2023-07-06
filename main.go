@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"ctx.sh/genie/pkg/cmd"
+)
 
 func main() {
-	fmt.Println("hello")
+	cmd.Execute()
 }

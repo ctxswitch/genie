@@ -11,10 +11,10 @@ import (
 
 type Configs struct {
 	// Not using paths yet, still trying to figure out if we even want it.
-	Paths     *Paths            `yaml:"paths"`
-	Events    map[string]*Event `yaml:"events"`
-	Resources *Resources        `yaml:"resources"`
-	Sinks     *Sinks            `yaml:"sinks"`
+	Paths     *Paths               `yaml:"paths"`
+	Templates map[string]*Template `yaml:"events"`
+	Resources *Resources           `yaml:"resources"`
+	Sinks     *Sinks               `yaml:"sinks"`
 }
 
 func LoadAll(dir string) (*Configs, error) {
@@ -32,21 +32,21 @@ func LoadAll(dir string) (*Configs, error) {
 		return nil, err
 	}
 
-	for _, event := range configs.Events {
-		if event.Template == "" {
+	for _, tmpl := range configs.Templates {
+		if tmpl.Template == "" {
 			continue
 		}
 
-		path := fmt.Sprintf("%s/%s", dir, event.Template)
+		path := fmt.Sprintf("%s/%s", dir, tmpl.Template)
 		abs, err := filepath.Abs(path)
 		if err != nil {
 			return nil, err
 		}
 
-		if tmpl, ok := templates[abs]; !ok {
+		if content, ok := templates[abs]; !ok {
 			return nil, fmt.Errorf("requested template does not exist: %s\n%v", abs, configs.listKeys(templates))
 		} else {
-			event.Raw = tmpl
+			tmpl.Raw = content
 		}
 	}
 

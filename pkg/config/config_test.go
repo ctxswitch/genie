@@ -17,5 +17,5 @@ func TestLoadAll(t *testing.T) {
 	c, err := LoadAll(dir)
 	assert.NoError(t, err)
 
-	fmt.Printf("%v\n", c.Events)
+	fmt.Printf("%v\n", c.Templates)
 }

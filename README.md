@@ -1,16 +1,27 @@
 # genie
 
-Event generator
+Event generator (more than just events... request/payload?)
 
-```
-~/.genie/all.yaml
-```
 
-```
-genie --config=path/to/config.yaml generate event/id
-genie --config=path/to/config.yaml generate events
-genie --dir=path/to/dir generate events
-```
+## Global Options
+
+* `--prefix/-p`: set the path prefix, i.e. the directory where all generator files will be kept.  Default value is `./genie.d`.
+* `--config/-c`: specify an alternate configuration file instead of the default (`<prefix>/config.yaml`).
+
+### generate
+
+* `generate events`: start generators for all configured events
+* `generate event/...`: start generator for a single event
+* `generate event ...`: start generator for a single event
+
+#### Options
+* `--sink/-s`: override the configured sink.
+* `--count=<num>`: output num events and shut down.
+
+### test
+
+test
+
 
 ```yaml
 resources:
