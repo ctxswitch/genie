@@ -35,7 +35,7 @@ func (i *IntegerRange) Cache() []string {
 	return c
 }
 
-func (i *IntegerRange) get() string {
+func (i *IntegerRange) Get() string {
 	if i.cache == nil {
 		i.cache = i.Cache()
 	}

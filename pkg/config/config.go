@@ -20,6 +20,8 @@ type Configs struct {
 func LoadAll(dir string) (*Configs, error) {
 	configs := &Configs{}
 
+	// TODO: fix paths for config and template loading.
+
 	// Fix me to add custom directories.  At the very least, I want to split out templates
 	// from normal config. Not sure about the others.
 	templates, err := configs.readTemplates(dir)
@@ -63,7 +65,12 @@ func (c *Configs) listKeys(m map[string]string) string {
 }
 
 func (c *Configs) readConfigs(dir string) error {
-	files, _ := filepath.Glob(fmt.Sprintf("%s/*.yaml", dir))
+	base, err := filepath.Abs(dir)
+	if err != nil {
+		return err
+	}
+
+	files, _ := filepath.Glob(fmt.Sprintf("%s/*.yaml", base))
 	for _, file := range files {
 		data, err := os.ReadFile(file)
 		if err != nil {
@@ -89,7 +96,12 @@ func (c *Configs) readTemplates(dir string) (map[string]string, error) {
 		templates = make(map[string]string)
 	}
 
-	files, _ := filepath.Glob(fmt.Sprintf("%s/*.tmpl", dir))
+	base, err := filepath.Abs(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	files, _ := filepath.Glob(fmt.Sprintf("%s/*.tmpl", base))
 	for _, file := range files {
 		data, err := os.ReadFile(file)
 		if err != nil {

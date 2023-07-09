@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"ctx.sh/genie/pkg/sinks"
 	"ctx.sh/genie/pkg/template"
 )
 
@@ -21,8 +22,8 @@ func NewManager(ctx context.Context) *Manager {
 	}
 }
 
-func (m *Manager) Add(name string, tmpl template.Template) {
-	g := NewGenerator(tmpl)
+func (m *Manager) Add(name string, tmpl *template.Template, sink sinks.Sink) {
+	g := NewGenerator(tmpl, sink)
 	m.generators[name] = g
 }
 
@@ -37,6 +38,7 @@ func (m *Manager) Start(ctx context.Context) error {
 		}
 	}
 
+	<-m.ctx.Done()
 	return nil
 }
 

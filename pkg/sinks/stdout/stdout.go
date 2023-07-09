@@ -16,8 +16,9 @@ func (s *Stdout) Connect() {
 
 func (s *Stdout) Init() {}
 
-func (s *Stdout) Send(event []byte) {
-	_, _ = s.fd.Write(event)
+func (s *Stdout) Send(data []byte) {
+	_, _ = s.fd.Write(data)
+	_, _ = s.fd.Write([]byte("\n"))
 }
 
 var _ sinks.Sink = &Stdout{}

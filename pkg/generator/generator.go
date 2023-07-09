@@ -6,12 +6,11 @@ import (
 	"time"
 
 	"ctx.sh/genie/pkg/sinks"
-	"ctx.sh/genie/pkg/sinks/stdout"
 	"ctx.sh/genie/pkg/template"
 )
 
 type Generator struct {
-	Template template.Template
+	Template *template.Template
 	Sink     sinks.Sink
 	Rate     time.Duration
 
@@ -19,11 +18,11 @@ type Generator struct {
 	stopOnce sync.Once
 }
 
-func NewGenerator(tmpl template.Template) *Generator {
+func NewGenerator(tmpl *template.Template, sink sinks.Sink) *Generator {
 	return &Generator{
 		Template: tmpl,
 		// fix me
-		Sink: &stdout.Stdout{},
+		Sink: sink,
 		Rate: time.Second,
 	}
 }
@@ -31,6 +30,10 @@ func NewGenerator(tmpl template.Template) *Generator {
 func (g *Generator) run(ctx context.Context) {
 	ticker := time.NewTicker(g.Rate)
 	defer ticker.Stop()
+
+	// Connect needs a error returned and then we need to
+	// figure out what the default behavior is.
+	g.Sink.Connect()
 
 	for {
 		select {

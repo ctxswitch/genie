@@ -1,5 +1,15 @@
 package resources
 
+import (
+	"ctx.sh/genie/pkg/resources/integer_range"
+	"ctx.sh/genie/pkg/resources/list"
+	"ctx.sh/genie/pkg/resources/random_string"
+	"ctx.sh/genie/pkg/resources/timestamp"
+	"ctx.sh/genie/pkg/resources/uuid"
+
+	"ctx.sh/genie/pkg/config"
+)
+
 type Resource interface {
 	Get() string
 }
@@ -22,6 +32,32 @@ func NewResources() *Resources {
 		timestamps:    make(map[string]Resource),
 		maps:          make(map[string]Resource),
 	}
+}
+
+func FromConfig(cfg *config.Configs) (*Resources, error) {
+	r := NewResources()
+
+	for k := range cfg.Resources.Lists {
+		r.lists[k] = list.FromConfig(cfg.Resources.Lists[k])
+	}
+
+	for k := range cfg.Resources.IntegerRanges {
+		r.integerRanges[k] = integer_range.FromConfig(cfg.Resources.IntegerRanges[k])
+	}
+
+	for k := range cfg.Resources.RandomStrings {
+		r.randomStrings[k] = random_string.FromConfig(cfg.Resources.RandomStrings[k])
+	}
+
+	for k := range cfg.Resources.Timestamps {
+		r.timestamps[k] = timestamp.FromConfig(cfg.Resources.Timestamps[k])
+	}
+
+	for k := range cfg.Resources.Uuids {
+		r.uuids[k] = uuid.FromConfig(cfg.Resources.Uuids[k])
+	}
+
+	return r, nil
 }
 
 func (r *Resources) Get(rtype string, name string) (Resource, error) {

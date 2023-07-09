@@ -7,6 +7,9 @@ import (
 
 	"ctx.sh/genie/pkg/config"
 	"ctx.sh/genie/pkg/generator"
+	"ctx.sh/genie/pkg/resources"
+	"ctx.sh/genie/pkg/sinks/stdout"
+	"ctx.sh/genie/pkg/template"
 	"github.com/spf13/cobra"
 )
 
@@ -20,22 +23,30 @@ var rootCmd = &cobra.Command{
 		ctx := context.Background()
 
 		// load config
-		_, err := config.LoadAll("./genie.d")
+		cfg, err := config.LoadAll("./genie.d")
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 
-		// make resources
-
-		// merge vars
-
-		// make templates
-
-		// sink := stdout.Stdout{}
-
-		// create event generators
 		m := generator.NewManager(ctx)
+
+		res, err := resources.FromConfig(cfg)
+
+		for k, v := range cfg.Templates {
+			// TODO: fix me.  move the map back into the config parsing
+			vars := make(map[string]string)
+			for _, v := range v.Vars {
+				vars[v.Name] = v.Value
+			}
+
+			// TODO: Global variables (which we don't have yet), need to to be
+			// merged in.
+			tmpl := template.NewTemplate().WithResources(res).WithVars(vars)
+			tmpl.Compile(v.Raw)
+
+			m.Add(k, tmpl, &stdout.Stdout{})
+		}
 
 		if err := m.Start(ctx); err != nil {
 			fmt.Fprintln(os.Stderr, err)
