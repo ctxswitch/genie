@@ -1,7 +1,7 @@
 package sinks
 
 type Sink interface {
-	Send(event []byte)
+	Send([]byte)
 	Connect()
 	Init()
 }

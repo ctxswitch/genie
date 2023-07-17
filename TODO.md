@@ -8,13 +8,15 @@
   * [] Map
 * [x] Implement stdout
 
-* [] Implement config parsing
+* [x] Implement config parsing
 * [] Test mode for config testing
+
+* [] Allow integer ranges to use gaussian distribution to output numbers between the min and max
 
 * [] Implement map to json transformer
 
 * [] Sinks can be defined for each event
-* [] Implement http sinks
+* [] Implement http/s sinks
 * [] Implement kafka sink
 
 * [] Support integers, floats, and boolean values

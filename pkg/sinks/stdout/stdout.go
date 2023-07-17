@@ -3,11 +3,16 @@ package stdout
 import (
 	"os"
 
+	"ctx.sh/genie/pkg/config"
 	"ctx.sh/genie/pkg/sinks"
 )
 
 type Stdout struct {
 	fd *os.File
+}
+
+func FromConfig(cfg config.Configs) sinks.Sink {
+	return &Stdout{}
 }
 
 func (s *Stdout) Connect() {
