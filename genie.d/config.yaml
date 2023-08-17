@@ -1,12 +1,8 @@
-paths:
-  resources_dir: ./genie.d
-  events_dir: ./genie.d
-  sinks_dir: ./genie.d
-  templates_dir: ./genie.d
 sinks:
   http:
-    inlet:
-      url: http://localhost
+    localhost:
+      url: http://localhost:8080
+      method: post
       headers:
         - name: Content-Type
           value: application/json
@@ -16,6 +12,8 @@ sinks:
           value: logging
         - name: X-Request-Id
           resource: uuid.request_uuid
+        - name: User-Agent
+          resource: list.user_agent
 events:
   planet_logs:
     generators: 1
@@ -26,5 +24,6 @@ events:
   raw_logs:
     generators: 1
     raw: >
-      <% let greeting = "hello" %>
-      << greeting >> world!
+      <% let left_name = list.left_names %>
+      <% let right_name = list.right_names %>
+      {"msg": "Hello <<left_name>> <<right_name>>!"}

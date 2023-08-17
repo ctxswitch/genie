@@ -2,17 +2,14 @@ package stdout
 
 import (
 	"os"
-
-	"ctx.sh/genie/pkg/config"
-	"ctx.sh/genie/pkg/sinks"
 )
 
 type Stdout struct {
 	fd *os.File
 }
 
-func FromConfig(cfg config.Configs) sinks.Sink {
-	return &Stdout{}
+func FromConfig() (*Stdout, error) {
+	return &Stdout{}, nil
 }
 
 func (s *Stdout) Connect() {
@@ -21,9 +18,12 @@ func (s *Stdout) Connect() {
 
 func (s *Stdout) Init() {}
 
-func (s *Stdout) Send(data []byte) {
+func (s *Stdout) Send(data []byte) error {
 	_, _ = s.fd.Write(data)
 	_, _ = s.fd.Write([]byte("\n"))
+	return nil
 }
 
-var _ sinks.Sink = &Stdout{}
+func (s *Stdout) Name() string {
+	return "stdout"
+}

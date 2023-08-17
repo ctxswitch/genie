@@ -13,11 +13,11 @@ type RandomString struct {
 	cache   []string
 }
 
-func FromConfig(options config.RandomString) *RandomString {
+func New(settings config.RandomStringBlock) *RandomString {
 	return &RandomString{
-		size:    options.Size,
-		chars:   options.Chars,
-		uniques: options.Uniques,
+		size:    settings.Size,
+		chars:   settings.Chars,
+		uniques: settings.Uniques,
 	}
 }
 

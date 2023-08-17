@@ -1,13 +1,12 @@
 package resources
 
 import (
+	"ctx.sh/genie/pkg/config"
 	"ctx.sh/genie/pkg/resources/integer_range"
 	"ctx.sh/genie/pkg/resources/list"
 	"ctx.sh/genie/pkg/resources/random_string"
 	"ctx.sh/genie/pkg/resources/timestamp"
 	"ctx.sh/genie/pkg/resources/uuid"
-
-	"ctx.sh/genie/pkg/config"
 )
 
 type Resource interface {
@@ -15,49 +14,97 @@ type Resource interface {
 }
 
 type Resources struct {
-	lists         map[string]Resource
-	integerRanges map[string]Resource
-	randomStrings map[string]Resource
-	uuids         map[string]Resource
-	timestamps    map[string]Resource
-	maps          map[string]Resource
+	Lists         map[string]Resource
+	IntegerRanges map[string]Resource
+	RandomStrings map[string]Resource
+	Uuids         map[string]Resource
+	Timestamps    map[string]Resource
+	Maps          map[string]Resource
 }
 
-func NewResources() *Resources {
+func ParseResources(block config.ResourcesBlock) (*Resources, error) {
+	integerRanges, err := parseIntegerRanges(block)
+	if err != nil {
+		return nil, err
+	}
+
+	lists, err := parseLists(block)
+	if err != nil {
+		return nil, err
+	}
+
+	randomStrings, err := parseRandomStrings(block)
+	if err != nil {
+		return nil, err
+	}
+
+	timestamps, err := parseTimestamps(block)
+	if err != nil {
+		return nil, err
+	}
+
+	uuids, err := parseUuids(block)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Resources{
-		lists:         make(map[string]Resource),
-		integerRanges: make(map[string]Resource),
-		randomStrings: make(map[string]Resource),
-		uuids:         make(map[string]Resource),
-		timestamps:    make(map[string]Resource),
-		maps:          make(map[string]Resource),
-	}
+		IntegerRanges: integerRanges,
+		RandomStrings: randomStrings,
+		Lists:         lists,
+		Timestamps:    timestamps,
+		Uuids:         uuids,
+	}, nil
 }
 
-func FromConfig(cfg *config.Configs) (*Resources, error) {
-	r := NewResources()
+func parseIntegerRanges(res config.ResourcesBlock) (map[string]Resource, error) {
+	out := make(map[string]Resource)
 
-	for k := range cfg.Resources.Lists {
-		r.lists[k] = list.FromConfig(cfg.Resources.Lists[k])
+	for k, v := range res.IntegerRanges {
+		out[k] = integer_range.New(v)
 	}
 
-	for k := range cfg.Resources.IntegerRanges {
-		r.integerRanges[k] = integer_range.FromConfig(cfg.Resources.IntegerRanges[k])
+	return out, nil
+}
+
+func parseRandomStrings(res config.ResourcesBlock) (map[string]Resource, error) {
+	out := make(map[string]Resource)
+
+	for k, v := range res.RandomStrings {
+		out[k] = random_string.New(v)
 	}
 
-	for k := range cfg.Resources.RandomStrings {
-		r.randomStrings[k] = random_string.FromConfig(cfg.Resources.RandomStrings[k])
+	return out, nil
+}
+
+func parseLists(res config.ResourcesBlock) (map[string]Resource, error) {
+	out := make(map[string]Resource)
+
+	for k, v := range res.Lists {
+		out[k] = list.New(v)
 	}
 
-	for k := range cfg.Resources.Timestamps {
-		r.timestamps[k] = timestamp.FromConfig(cfg.Resources.Timestamps[k])
+	return out, nil
+}
+
+func parseTimestamps(res config.ResourcesBlock) (map[string]Resource, error) {
+	out := make(map[string]Resource)
+
+	for k, v := range res.Timestamps {
+		out[k] = timestamp.New(v)
 	}
 
-	for k := range cfg.Resources.Uuids {
-		r.uuids[k] = uuid.FromConfig(cfg.Resources.Uuids[k])
+	return out, nil
+}
+
+func parseUuids(res config.ResourcesBlock) (map[string]Resource, error) {
+	out := make(map[string]Resource)
+
+	for k, v := range res.Uuids {
+		out[k] = uuid.New(v)
 	}
 
-	return r, nil
+	return out, nil
 }
 
 func (r *Resources) Get(rtype string, name string) (Resource, error) {
@@ -89,7 +136,7 @@ func (r *Resources) MustGet(rtype string, name string) Resource {
 }
 
 func (r *Resources) GetList(name string) (Resource, error) {
-	if resource, ok := r.lists[name]; ok {
+	if resource, ok := r.Lists[name]; ok {
 		return resource, nil
 	}
 
@@ -97,7 +144,7 @@ func (r *Resources) GetList(name string) (Resource, error) {
 }
 
 func (r *Resources) GetIntegerRange(name string) (Resource, error) {
-	if resource, ok := r.integerRanges[name]; ok {
+	if resource, ok := r.IntegerRanges[name]; ok {
 		return resource, nil
 	}
 
@@ -105,7 +152,7 @@ func (r *Resources) GetIntegerRange(name string) (Resource, error) {
 }
 
 func (r *Resources) GetRandomString(name string) (Resource, error) {
-	if resource, ok := r.randomStrings[name]; ok {
+	if resource, ok := r.RandomStrings[name]; ok {
 		return resource, nil
 	}
 
@@ -113,7 +160,7 @@ func (r *Resources) GetRandomString(name string) (Resource, error) {
 }
 
 func (r *Resources) GetUuid(name string) (Resource, error) {
-	if resource, ok := r.uuids[name]; ok {
+	if resource, ok := r.Uuids[name]; ok {
 		return resource, nil
 	}
 
@@ -121,7 +168,7 @@ func (r *Resources) GetUuid(name string) (Resource, error) {
 }
 
 func (r *Resources) GetTimestamp(name string) (Resource, error) {
-	if resource, ok := r.timestamps[name]; ok {
+	if resource, ok := r.Timestamps[name]; ok {
 		return resource, nil
 	}
 
@@ -129,7 +176,7 @@ func (r *Resources) GetTimestamp(name string) (Resource, error) {
 }
 
 func (r *Resources) GetMap(name string) (Resource, error) {
-	if resource, ok := r.maps[name]; ok {
+	if resource, ok := r.Maps[name]; ok {
 		return resource, nil
 	}
 

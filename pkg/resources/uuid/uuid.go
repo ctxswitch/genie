@@ -10,25 +10,27 @@ import (
 type UuidFunc func() string
 
 type Uuid struct {
-	uuidType string
-	uniques  int
-	fn       UuidFunc
-	cache    []string
+	uniques int
+	fn      UuidFunc
+	cache   []string
 }
 
-func FromConfig(options config.Uuid) *Uuid {
+func New(settings config.UuidBlock) *Uuid {
 	u := &Uuid{
-		uniques: options.Uniques,
+		uniques: settings.Uniques,
 	}
 
-	switch options.Type {
+	u.setFn(settings.Type)
+	return u
+}
+
+func (u *Uuid) setFn(t string) {
+	switch t {
 	case "uuid1":
 		u.fn = u.uuid1
 	default:
 		u.fn = u.uuid4
 	}
-
-	return u
 }
 
 func (u *Uuid) Cache() []string {
@@ -53,6 +55,7 @@ func (u *Uuid) Get() string {
 func (u *Uuid) uuid1() string {
 	id, e := uuid.NewUUID()
 	if e != nil {
+		// TODO: rethink this
 		return "deadbeef-0000-0000-0000-000000000000"
 	}
 

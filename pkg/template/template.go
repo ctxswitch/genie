@@ -1,20 +1,26 @@
 package template
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"ctx.sh/genie/pkg/resources"
 )
 
 type Template struct {
-	root Root
+	root  Root
+	paths []string
 	// This could end up being any in the future
 	vars      map[string]string
 	resources *resources.Resources
 }
 
 func NewTemplate() *Template {
-	return &Template{}
+	return &Template{
+		vars: make(map[string]string),
+	}
 }
 
 func (t *Template) Compile(input string) error {
@@ -28,13 +34,48 @@ func (t *Template) Compile(input string) error {
 	return nil
 }
 
+func (t *Template) CompileFrom(file string) error {
+	// Option 1) If the file is relative, tack it on to the paths (which should be absolute?)
+	// Option 2) If the file is absolute, just use that.
+	var data []byte
+	var err error
+	if filepath.IsAbs(file) {
+		data, err = os.ReadFile(file)
+		if err != nil {
+			return err
+		} else {
+			return t.Compile(string(data))
+		}
+	} else {
+		for _, path := range t.paths {
+			file := fmt.Sprintf("%s/%s", path, file)
+			_, err := os.Stat(file)
+			if err == nil {
+				data, err = os.ReadFile(file)
+				if err != nil {
+					return err
+				} else {
+					return t.Compile(string(data))
+				}
+			}
+		}
+	}
+
+	return fmt.Errorf("template does not exist in search path: %s", file)
+}
+
+func (t *Template) WithPaths(p []string) *Template {
+	t.paths = p
+	return t
+}
+
 func (t *Template) WithResources(r *resources.Resources) *Template {
 	t.resources = r
 	return t
 }
 
-func (t *Template) WithVars(vars map[string]string) *Template {
-	t.vars = vars
+func (t *Template) WithVar(name, value string) *Template {
+	t.vars[name] = value
 	return t
 }
 

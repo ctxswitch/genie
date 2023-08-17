@@ -30,6 +30,17 @@ test:
 build: verify
 	@CGO_ENABLED=0 GOOS=linux go build -trimpath --ldflags $(LDFLAGS) -o dynamo
 
+testcerts:
+	@(cd tests/integration/nginx && ./gen-certs.sh)
+
+testnginx:
+	@docker run --name genie-nginx --rm \
+		--mount type=bind,source=${PWD}/tests/integration/nginx/conf,target=/etc/nginx,readonly \
+		--entrypoint="" \
+		-p 8080:8080 -p 8443:8443 \
+		nginx:latest \
+		nginx -c /etc/nginx/nginx.conf
+
 clean:
 	@find . -name '*.test' | xargs rm -fv
 	@find . -name '*~' | xargs rm -fv

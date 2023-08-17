@@ -10,10 +10,19 @@ type List struct {
 	items []string
 }
 
-func FromConfig(options config.List) *List {
-	return &List{items: options}
+func New(settings config.ListBlock) *List {
+	return &List{items: []string(settings)}
 }
 
-func (l List) Get() string {
+func (l *List) WithItems(items []string) *List {
+	l.items = items
+	return l
+}
+
+func (l *List) Get() string {
+	if len(l.items) == 0 {
+		return ""
+	}
+
 	return l.items[rand.Intn(len(l.items))]
 }
