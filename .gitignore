@@ -16,3 +16,8 @@ vendor/
 .vscode/
 
 *_save/
+
+# Don't store test certs
+tests/integration/nginx/conf/ssl/ca.*
+tests/integration/nginx/conf/ssl/server.*
+tests/integration/nginx/conf/ssl/localhost.*

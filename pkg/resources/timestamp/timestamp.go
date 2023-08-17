@@ -9,17 +9,27 @@ import (
 )
 
 type Timestamp struct {
+	// format is a textual representation of the time value formatted
+	// according to the layout defined by the argument.  It follows
+	// the go representation for time formats.  There are several mapped
+	// values that will convert to the go equivalent including: rfc3339,
+	// rfc3999nano, unix, and unixnano.
 	format    string
 	timestamp string
 	provider  timestamp.TimestampProvider
 }
 
-func FromConfig(options config.Timestamp) *Timestamp {
+func New(settings config.TimestampBlock) *Timestamp {
 	return &Timestamp{
-		format:    options.Format,
-		timestamp: options.Timestamp,
+		format:    settings.Format,
+		timestamp: settings.Timestamp,
 		provider:  timestamp.RealTime{},
 	}
+}
+
+func (t *Timestamp) WithProvider(provider timestamp.TimestampProvider) *Timestamp {
+	t.provider = provider
+	return t
 }
 
 func (t *Timestamp) Get() string {
@@ -56,7 +66,6 @@ func (t *Timestamp) Get() string {
 	return formatted
 }
 
-func (t *Timestamp) WithProvider(provider timestamp.TimestampProvider) *Timestamp {
-	t.provider = provider
-	return t
+func (t *Timestamp) Validate() error {
+	return nil
 }

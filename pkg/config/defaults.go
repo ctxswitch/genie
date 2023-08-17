@@ -15,7 +15,6 @@ const (
 	MaxRandomStringSize    = 100
 	MaxRandomStringUniques = 100000
 
-	// The default time format to use if no format is provided
 	DefaultTimeFormat    = time.RFC3339Nano
 	DefaultTimeTimestamp = ""
 

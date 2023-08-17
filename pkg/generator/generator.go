@@ -5,26 +5,43 @@ import (
 	"sync"
 	"time"
 
+	"ctx.sh/apex"
 	"ctx.sh/genie/pkg/sinks"
 	"ctx.sh/genie/pkg/template"
+	"github.com/go-logr/logr"
 )
 
 type Generator struct {
 	Template *template.Template
 	Sink     sinks.Sink
 	Rate     time.Duration
+	Name     string
+
+	logger  logr.Logger
+	metrics *apex.Metrics
 
 	stopChan chan struct{}
 	stopOnce sync.Once
 }
 
-func NewGenerator(tmpl *template.Template, sink sinks.Sink) *Generator {
+func NewGenerator(name string, tmpl *template.Template, sink sinks.Sink) *Generator {
 	return &Generator{
 		Template: tmpl,
 		// fix me
 		Sink: sink,
 		Rate: time.Second,
+		Name: name,
 	}
+}
+
+func (g *Generator) WithLogger(logger logr.Logger) *Generator {
+	g.logger = logger.V(3).WithValues("sink", g.Sink.Name(), "template", g.Name)
+	return g
+}
+
+func (g *Generator) WithMetrics(metrics *apex.Metrics) *Generator {
+	g.metrics = metrics.WithPrefix("generator").WithLabels("name", "sink")
+	return g
 }
 
 func (g *Generator) run(ctx context.Context) {
@@ -38,7 +55,15 @@ func (g *Generator) run(ctx context.Context) {
 	for {
 		select {
 		case <-ticker.C:
-			g.Sink.Send([]byte(g.Template.Execute()))
+			g.metrics.CounterInc("run", g.Name, g.Sink.Name())
+			p := g.Template.Execute()
+			err := g.Sink.Send([]byte(p))
+			if err != nil {
+				g.metrics.CounterInc("send_error", g.Name, g.Sink.Name())
+				g.logger.Error(err, "send error", g.Name, g.Sink.Name())
+			} else {
+				g.metrics.CounterInc("send_success", g.Name, g.Sink.Name())
+			}
 		case <-g.stopChan:
 			return
 		case <-ctx.Done():

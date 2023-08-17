@@ -7,12 +7,12 @@ import (
 
 func MockResources() *Resources {
 	lists := map[string]Resource{
-		"name":      list.FromConfig(config.List{"Jim Halpert"}),
-		"greeting":  list.FromConfig(config.List{"Hello"}),
-		"statement": list.FromConfig(config.List{"I'm sorry Mr. Buttlicker"}),
+		"name":      list.New(config.ListBlock{"Jim Halpert"}),
+		"greeting":  list.New(config.ListBlock{"Hello"}),
+		"statement": list.New(config.ListBlock{"I'm sorry Mr. Buttlicker"}),
 	}
 
 	return &Resources{
-		lists: lists,
+		Lists: lists,
 	}
 }

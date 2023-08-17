@@ -15,12 +15,12 @@ type IntegerRange struct {
 	cache []string
 }
 
-func FromConfig(options config.IntegerRange) *IntegerRange {
+func New(settings config.IntegerRangeBlock) *IntegerRange {
 	return &IntegerRange{
-		min:  options.Min,
-		max:  options.Max,
-		step: options.Step,
-		pad:  options.Pad,
+		min:  settings.Min,
+		max:  settings.Max,
+		step: settings.Step,
+		pad:  settings.Pad,
 	}
 }
 
