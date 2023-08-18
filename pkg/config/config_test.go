@@ -1,12 +1,19 @@
 package config
 
-// func TestLoadAll(t *testing.T) {
-// 	path, err := os.Getwd()
-// 	require.NoError(t, err)
+import (
+	"fmt"
+	"os"
+	"testing"
 
-// 	dir := fmt.Sprintf("%s/../../genie.d", path)
-// 	c, err := LoadAll(dir)
-// 	assert.NoError(t, err)
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
 
-// 	fmt.Printf("%v\n", c.Events)
-// }
+func TestLoadAll(t *testing.T) {
+	path, err := os.Getwd()
+	require.NoError(t, err)
+
+	dir := fmt.Sprintf("%s/../../genie.d", path)
+	_, err = Load([]string{dir})
+	assert.NoError(t, err)
+}

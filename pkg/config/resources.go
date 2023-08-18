@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -19,6 +20,15 @@ type IntegerRangeBlock struct {
 	Pad  uint32 `yaml:"pad"`
 }
 
+func (i *IntegerRangeBlock) validate() error {
+	// Fix me now that we allow negative values
+	if i.Max <= i.Min {
+		return fmt.Errorf("max (%d) in integer_range must be greater than zero and the minimum value", i.Max)
+	}
+
+	return nil
+}
+
 func (i *IntegerRangeBlock) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type IntegerRangeBlockDefaulted IntegerRangeBlock
 	var defaults = IntegerRangeBlockDefaulted{
@@ -34,6 +44,9 @@ func (i *IntegerRangeBlock) UnmarshalYAML(unmarshal func(interface{}) error) err
 	}
 
 	tmpl := IntegerRangeBlock(out)
+	if err := tmpl.validate(); err != nil {
+		return err
+	}
 
 	*i = tmpl
 	return nil
@@ -41,10 +54,53 @@ func (i *IntegerRangeBlock) UnmarshalYAML(unmarshal func(interface{}) error) err
 
 type ListBlock []string
 
+func (l *ListBlock) validate() error {
+	if len(*l) == 0 {
+		return fmt.Errorf("items in list cannot be empty")
+	}
+
+	return nil
+}
+
+func (l *ListBlock) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type ListBlockDefaulted ListBlock
+	var defaults = ListBlockDefaulted{}
+
+	out := defaults
+	if err := unmarshal(&out); err != nil {
+		return err
+	}
+
+	list := ListBlock(out)
+	if err := list.validate(); err != nil {
+		return err
+	}
+
+	*l = list
+	return nil
+}
+
 type RandomStringBlock struct {
 	Size    uint32 `yaml:"size"`
 	Chars   []rune `yaml:"chars"`
 	Uniques uint32 `yaml:"uniques"`
+}
+
+func (r *RandomStringBlock) validate() error {
+	if r.Size < 1 || r.Size > MaxRandomStringSize {
+		return fmt.Errorf("size (%d) in random_string must be greater than zero and less than or equal to %d",
+			r.Size,
+			MaxRandomStringSize,
+		)
+	}
+
+	if r.Uniques > MaxRandomStringUniques {
+		return fmt.Errorf("uniques (%d) in random_string must be less than or equal to %d",
+			r.Uniques,
+			MaxRandomStringUniques,
+		)
+	}
+	return nil
 }
 
 func (r *RandomStringBlock) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -67,19 +123,26 @@ func (r *RandomStringBlock) UnmarshalYAML(unmarshal func(interface{}) error) err
 		return err
 	}
 
-	tmpl := RandomStringBlock{
+	rs := RandomStringBlock{
 		Size:    out.Size,
 		Chars:   convertChars(out.Chars),
 		Uniques: out.Uniques,
 	}
+	if err := rs.validate(); err != nil {
+		return err
+	}
 
-	*r = tmpl
+	*r = rs
 	return nil
 }
 
 type TimestampBlock struct {
 	Format    string `yaml:"format"`
 	Timestamp string `yaml:"timestamp"`
+}
+
+func (t *TimestampBlock) validate() error {
+	return nil
 }
 
 func (t *TimestampBlock) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -94,15 +157,25 @@ func (t *TimestampBlock) UnmarshalYAML(unmarshal func(interface{}) error) error 
 		return err
 	}
 
-	tmpl := TimestampBlock(out)
+	ts := TimestampBlock(out)
+	if err := ts.validate(); err != nil {
+		return err
+	}
 
-	*t = tmpl
+	*t = ts
 	return nil
 }
 
 type UuidBlock struct {
 	Type    string `yaml:"type"`
 	Uniques int    `yaml:"uniques"`
+}
+
+func (u *UuidBlock) validate() error {
+	if !(u.Type == "uuid1" || u.Type == "uuid4") {
+		return fmt.Errorf("unsupported UUID type %s for uuid", u.Type)
+	}
+	return nil
 }
 
 func (u *UuidBlock) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -117,12 +190,15 @@ func (u *UuidBlock) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
-	tmpl := UuidBlock(out)
+	uuid := UuidBlock(out)
 
 	// Ensure we have a lowercase type
-	tmpl.Type = strings.ToLower(tmpl.Type)
+	uuid.Type = strings.ToLower(uuid.Type)
+	if err := uuid.validate(); err != nil {
+		return err
+	}
 
-	*u = tmpl
+	*u = uuid
 	return nil
 }
 

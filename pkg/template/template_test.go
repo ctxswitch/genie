@@ -40,13 +40,10 @@ HELLO World!
 func TestTemplateParse(t *testing.T) {
 	var err error
 
-	vars := make(map[string]string)
-	vars["name"] = "Dwight Schrute"
-
 	// TODO: fix test
 	tmpl := NewTemplate().
-		WithResources(resources.MockResources()) //.
-		//WithVars(vars)
+		WithResources(resources.MockResources()).
+		WithVar("name", "Dwight Schrute")
 
 	// Something to think about.  We can look for compile time unknown variable
 	// issues by keeping track of any new variable that is set when we parse
