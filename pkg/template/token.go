@@ -25,6 +25,7 @@ var builtins = map[string]TokenType{
 	"reverse":    TokenFilter,
 	"wordwrap":   TokenFilter,
 	"trim":       TokenFilter,
+	"tojson":     TokenFilter,
 }
 
 type Token struct {
