@@ -3,6 +3,7 @@ package template
 import (
 	"ctx.sh/genie/pkg/filter"
 	"ctx.sh/genie/pkg/resources"
+	"ctx.sh/genie/pkg/variables"
 )
 
 type Node interface {
@@ -32,13 +33,13 @@ type TextNode interface {
 type StatementNode interface {
 	Node
 	StatementNode()
-	WithVars(map[string]string) ExpressionNode
+	WithVars(*variables.ScopedVariables) ExpressionNode
 }
 
 type ExpressionNode interface {
 	Node
 	ExpressionNode()
-	WithVars(map[string]string) ExpressionNode
+	WithVars(*variables.ScopedVariables) ExpressionNode
 }
 
 type Control struct{}
@@ -61,9 +62,8 @@ type Expression struct {
 	Token    Token
 	Name     string
 	Resource resources.Resource
-	Vars     map[string]string // This changes to any once we introduce
-	// more types.
-	Filter filter.FilterFunc
+	Vars     *variables.ScopedVariables
+	Filter   filter.FilterFunc
 }
 
 func (n *Expression) Literal() string { return n.Token.Literal }
@@ -74,7 +74,7 @@ func (n *Expression) String() string {
 	case TokenResource:
 		out = n.Resource.Get()
 	case TokenIdentifier:
-		if out, ok = n.Vars[n.Token.Literal]; !ok {
+		if out, ok = n.Vars.Get(n.Token.Literal); !ok {
 			// This should change once we start checking for existence
 			// when parsing. i.e. we want to make sure it exists...
 			out = n.Token.Literal
@@ -86,21 +86,27 @@ func (n *Expression) String() string {
 
 	return out
 }
-func (n *Expression) WithVars(vars map[string]string) ExpressionNode { n.Vars = vars; return n }
-func (n *Expression) ExpressionNode()                                {}
+func (n *Expression) WithVars(vars *variables.ScopedVariables) ExpressionNode {
+	n.Vars = vars
+	return n
+}
+func (n *Expression) ExpressionNode() {}
 
 // Probably can consolidate this like we did with expression
 type LetStatement struct {
 	Token      Token
 	Identifier string
 	Expression ExpressionNode
-	Vars       map[string]string
+	Vars       *variables.ScopedVariables
 }
 
-func (n *LetStatement) Literal() string                               { return n.Token.Literal }
-func (n *LetStatement) String() string                                { return n.Token.Literal }
-func (n *LetStatement) WithVars(vars map[string]string) *LetStatement { n.Vars = vars; return n }
-func (n *LetStatement) StatementNode()                                {}
+func (n *LetStatement) Literal() string { return n.Token.Literal }
+func (n *LetStatement) String() string  { return n.Token.Literal }
+func (n *LetStatement) WithVars(vars *variables.ScopedVariables) *LetStatement {
+	n.Vars = vars
+	return n
+}
+func (n *LetStatement) StatementNode() {}
 
 // I'll convert this to allow for comments as logs later.
 type Comment struct {

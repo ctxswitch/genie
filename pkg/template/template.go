@@ -7,20 +7,19 @@ import (
 	"strings"
 
 	"ctx.sh/genie/pkg/resources"
+	"ctx.sh/genie/pkg/variables"
 )
 
 type Template struct {
 	root  Root
 	paths []string
 	// This could end up being any in the future
-	vars      map[string]string
+	vars      *variables.ScopedVariables
 	resources *resources.Resources
 }
 
 func NewTemplate() *Template {
-	return &Template{
-		vars: make(map[string]string),
-	}
+	return &Template{}
 }
 
 func (t *Template) Compile(input string) error {
@@ -74,8 +73,8 @@ func (t *Template) WithResources(r *resources.Resources) *Template {
 	return t
 }
 
-func (t *Template) WithVar(name, value string) *Template {
-	t.vars[name] = value
+func (t *Template) WithVariables(vars *variables.Variables) *Template {
+	t.vars = variables.NewScopedVariables(vars)
 	return t
 }
 
@@ -106,7 +105,7 @@ func (t *Template) eval(root Root) string {
 			if exp.Filter != nil {
 				e = exp.Filter(e)
 			}
-			t.vars[n.Identifier] = e
+			t.vars.Set(n.Identifier, e)
 		default:
 			out.WriteString(n.String())
 		}

@@ -22,7 +22,7 @@ type Resources struct {
 	Maps          map[string]Resource
 }
 
-func ParseResources(block config.ResourcesBlock) (*Resources, error) {
+func Parse(block config.ResourcesBlock) (*Resources, error) {
 	integerRanges, err := parseIntegerRanges(block)
 	if err != nil {
 		return nil, err

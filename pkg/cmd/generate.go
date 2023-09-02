@@ -4,12 +4,13 @@ import (
 	"context"
 	"os"
 
-	"ctx.sh/strata"
 	"ctx.sh/genie/pkg/config"
 	"ctx.sh/genie/pkg/generator"
 	"ctx.sh/genie/pkg/resources"
 	"ctx.sh/genie/pkg/sinks"
 	"ctx.sh/genie/pkg/template"
+	"ctx.sh/genie/pkg/variables"
+	"ctx.sh/strata"
 	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
 )
@@ -43,7 +44,7 @@ func (g *Generate) RunE(cmd *cobra.Command, args []string) error {
 	g.logger.Info("starting generator", "args", args, "config", g.cfg)
 
 	g.logger.Info("loading resources")
-	res, err := resources.ParseResources(g.cfg.Resources)
+	res, err := resources.Parse(g.cfg.Resources)
 	if err != nil {
 		g.logger.Error(err, "unable to load resources")
 		os.Exit(1)
@@ -65,13 +66,17 @@ func (g *Generate) RunE(cmd *cobra.Command, args []string) error {
 	for k, v := range g.cfg.Events {
 		g.logger.Info("loading event", "event", k, "values", v)
 
-		tmpl := template.NewTemplate().
-			WithPaths([]string{"./genie.d"}).
-			WithResources(res)
-
-		for _, x := range v.Vars {
-			tmpl.WithVar(x.Name, x.Value)
+		vars, err := variables.Parse(v.Vars)
+		if err != nil {
+			g.logger.Error(err, "event load failed, invalid variables", "event", k)
+			continue
 		}
+
+		tmpl := template.NewTemplate().
+			// TODO: configure paths (use several paths + configurable in priority order)
+			WithPaths([]string{"./genie.d"}).
+			WithResources(res).
+			WithVariables(vars)
 
 		if v.Template != "" {
 			err = tmpl.CompileFrom(v.Template)

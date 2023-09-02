@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"ctx.sh/genie/pkg/resources"
+	"ctx.sh/genie/pkg/variables"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -43,7 +44,7 @@ func TestTemplateParse(t *testing.T) {
 	// TODO: fix test
 	tmpl := NewTemplate().
 		WithResources(resources.MockResources()).
-		WithVar("name", "Dwight Schrute")
+		WithVariables(variables.MockVariables())
 
 	// Something to think about.  We can look for compile time unknown variable
 	// issues by keeping track of any new variable that is set when we parse
