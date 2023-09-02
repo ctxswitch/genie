@@ -18,6 +18,7 @@ import (
 
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGSTOP)
+	defer cancel()
 
 	// Logging
 	encoderCfg := zap.NewProductionEncoderConfig()

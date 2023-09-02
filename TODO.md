@@ -1,50 +1,49 @@
 # TODO
-* [] Implement resources
-  * [x] Lists
-  * [x] Integer range
-  * [x] Random string
-  * [x] UUID
-  * [x] Timestamp
-  * [] Map
-* [x] Implement stdout
 
-* [x] Implement config parsing
-* [] Test mode for config testing
+### Commands
+* [] Parse the events and event/name args
+* [] Add global config args for config locations
+* [] Add run-once
+* [] Add test-config
+* [] Clean up Generate.RunE
 
+### Resources
 * [] Allow integer ranges to use gaussian distribution to output numbers between the min and max
+* [] New IP resource, build out database (whether it's csv or sqlite) and use some sort of weighted random selection based on the number of ips in a subnet, then random from the min/max of the range.  User would be able to specify region(s).
 
-* [] Implement map to json transformer
-
-* [] Sinks can be defined for each event
-* [] Implement http/s sinks
-* [] Implement kafka sink
-
+### Template
+* [x] Variable refactor/extraction
+* [x] New system for variable scoping
+* [] Introduce scoped variables to templates.  They won't come into play until loops/conditions
 * [] Support integers, floats, and boolean values
 * [] Expressions support for values other than strings
 * [] Add for loop with variable scoping
 * [] Add if/elif/else conditionals
-
 * [] Macro support (macro/endmacro)
 * [] Snippet support (import)
+* [] Custom tags/objects - this I'm not sure of right now, as it'd probably just be useful in a few edge cases.
 
-* [] Custom tags/objects
-* [] We need to be able to register encoders/transformers and sinks.  Question to all encoders start out by getting json bytes?  Might be an easy way to start.
+### Sinks
+* [] Sinks can be defined for each event
+* [] Implement kafka sink
+* [] Implement backoff for HTTP(s) sinks
+* [] Add sink overrides from the command.  Not a big deal right now, but we could use that for sending to stdout or another test endpoint while a developer is building/testing the events.
+* [] Maybe (leaning heavily to this): Sinks should be able to pool requests from multiple generators.  This would mean that sinks would be shared across all events.  This would make sense from a resource perspective as to not overwhelm an endpoint, but that also means that the sinks would be independent and we run them independently from the generators.
 
-### Up next
-* [] Configs are completely refactored, but now we aren't outputting.  I'm thinking that we keep sinks as a string in the event and then lookup in the manager.  Maybe decouple resources the same way?  Not sure yet though.  At the minimum I need to clean up the event parser.
-* [] Maybe revisit Events again, not sure.  More I look at it, it's feeling like it's too coupled.
+### Encoding
+* [] Create encoders for the events.  Still don't have them planned out, but they would allow custom/builtin encoding i.e. json bytes, msgpack, etc.
+
+### Maps
+* [] Line out the purpose of maps within the current structure.  At this point I'm not sure that I need them.
+* [] Implement maps.
+* [] Implement a map to json string filter.
+
+### Fixes
 * [] vars are not allocated automatically before execute, so panic ensues.
----
-* [] Parse the events and event/name args
-* [] Add global config values like config location
-* [] Clean up Generate.RunE
-* [] Add sink overrides
-* [] Run once impl
+* [] Unknown lists are returning empty with no warnings.  Should probably have warnings during compile at least.
 * [] Unknown lists are returning empty with no warnings.  Should probably have warnings during compile at least.
 
 Notes:
-* Sinks should be able to pool requests from multiple generators.  This would mean that sinks would be shared across all events. 
-* Figure out where the configs will be parsed.  I think that configs will probably be parsed in Root.Execute, or we move the bulk of the config parsing and resource construction out of the root/generate where it is now.  Consider some sort of a builder package that takes a config and returns resources, sinks, templates, and all.
+
 * Need to start on the user docs soon.
 * Review testing for commands.
-* For the new IP resource, build out database (whether it's csv or sqlite) and use some sort of weighted random selection based on the number of ips in a subnet, then random from the min/max of the range.

@@ -1,25 +1,25 @@
 package config
 
-type VarBlock struct {
+type VariableBlock struct {
 	Name  string `yaml:"name"`
 	Value string `yaml:"value"`
 }
 
 type EventBlock struct {
-	Generators int        `yaml:"generators"`
-	Vars       []VarBlock `yaml:"vars"`
-	Template   string     `yaml:"template"`
-	Raw        string     `yaml:"raw"`
-	Sinks      []string   `yaml:"sink"`
+	Generators int             `yaml:"generators"`
+	Vars       []VariableBlock `yaml:"vars"`
+	Template   string          `yaml:"template"`
+	Raw        string          `yaml:"raw"`
+	Sinks      []string        `yaml:"sink"`
 }
 
 func (e *EventBlock) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type EventBlockDefaults struct {
-		Generators int        `yaml:"generators"`
-		Vars       []VarBlock `yaml:"vars"`
-		Template   string     `yaml:"template"`
-		Raw        string     `yaml:"raw"`
-		Sinks      []string   `yaml:"sink"`
+		Generators int             `yaml:"generators"`
+		Vars       []VariableBlock `yaml:"vars"`
+		Template   string          `yaml:"template"`
+		Raw        string          `yaml:"raw"`
+		Sinks      []string        `yaml:"sink"`
 	}
 
 	var defaults = EventBlockDefaults{
