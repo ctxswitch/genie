@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"ctx.sh/apex"
+	"ctx.sh/strata"
 	"ctx.sh/genie/pkg/config"
 	"ctx.sh/genie/pkg/generator"
 	"ctx.sh/genie/pkg/resources"
@@ -23,7 +23,7 @@ specifiers`
 
 type Generate struct {
 	logger  logr.Logger
-	metrics *apex.Metrics
+	metrics *strata.Metrics
 	cfg     config.ConfigBlock
 	once    bool
 	ctx     context.Context

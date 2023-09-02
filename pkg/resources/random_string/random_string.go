@@ -37,7 +37,7 @@ func (r *RandomString) Get() string {
 			r.cache = r.Cache()
 		}
 
-		return r.cache[rand.Intn(len(r.cache))]
+		return r.cache[rand.Intn(len(r.cache))] //nolint:gosec
 	}
 
 	return r.randomizer()
@@ -46,7 +46,7 @@ func (r *RandomString) Get() string {
 func (r *RandomString) randomizer() string {
 	c := make([]rune, r.size)
 	for i := range c {
-		c[i] = r.chars[rand.Intn(len(r.chars))]
+		c[i] = r.chars[rand.Intn(len(r.chars))] //nolint:gosec
 	}
 
 	return string(c)

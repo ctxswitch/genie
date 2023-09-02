@@ -4,9 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"ctx.sh/apex"
 	"ctx.sh/genie/pkg/sinks"
 	"ctx.sh/genie/pkg/template"
+	"ctx.sh/strata"
 	"github.com/go-logr/logr"
 )
 
@@ -15,7 +15,7 @@ type Manager struct {
 	generators map[string]*Generator
 	ctx        context.Context
 	logger     logr.Logger
-	metrics    *apex.Metrics
+	metrics    *strata.Metrics
 	sync.RWMutex
 }
 
@@ -31,7 +31,7 @@ func (m *Manager) WithLogger(logger logr.Logger) *Manager {
 	return m
 }
 
-func (m *Manager) WithMetrics(metrics *apex.Metrics) *Manager {
+func (m *Manager) WithMetrics(metrics *strata.Metrics) *Manager {
 	m.metrics = metrics
 	return m
 }

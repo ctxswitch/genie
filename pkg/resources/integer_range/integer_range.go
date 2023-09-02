@@ -40,5 +40,5 @@ func (i *IntegerRange) Get() string {
 		i.cache = i.Cache()
 	}
 
-	return i.cache[rand.Intn(len(i.cache))]
+	return i.cache[rand.Intn(len(i.cache))] //nolint:gosec
 }

@@ -29,7 +29,7 @@ func (s *LexerMode) Start(m mode) {
 	*s = append(*s, m)
 }
 
-// Do I handle the error here?  I may be easy to accidently end the wrong one
+// Do I handle the error here?  I may be easy to accidentally end the wrong one
 // opaquely.
 func (s *LexerMode) End(m mode) error {
 	size := s.size()

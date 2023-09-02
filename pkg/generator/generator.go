@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
-	"ctx.sh/apex"
 	"ctx.sh/genie/pkg/sinks"
 	"ctx.sh/genie/pkg/template"
+	"ctx.sh/strata"
 	"github.com/go-logr/logr"
 )
 
@@ -18,7 +18,7 @@ type Generator struct {
 	Name     string
 
 	logger  logr.Logger
-	metrics *apex.Metrics
+	metrics *strata.Metrics
 
 	stopChan chan struct{}
 	stopOnce sync.Once
@@ -39,7 +39,7 @@ func (g *Generator) WithLogger(logger logr.Logger) *Generator {
 	return g
 }
 
-func (g *Generator) WithMetrics(metrics *apex.Metrics) *Generator {
+func (g *Generator) WithMetrics(metrics *strata.Metrics) *Generator {
 	g.metrics = metrics.WithPrefix("generator").WithLabels("name", "sink")
 	return g
 }

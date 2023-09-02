@@ -3,7 +3,7 @@ module ctx.sh/genie
 go 1.20
 
 require (
-	ctx.sh/apex v0.3.1
+	ctx.sh/strata v0.4.1
 	github.com/go-logr/logr v1.2.4
 	github.com/go-logr/zapr v1.2.4
 	github.com/google/uuid v1.3.0

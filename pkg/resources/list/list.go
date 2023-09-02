@@ -24,5 +24,5 @@ func (l *List) Get() string {
 		return ""
 	}
 
-	return l.items[rand.Intn(len(l.items))]
+	return l.items[rand.Intn(len(l.items))] //nolint:gosec
 }

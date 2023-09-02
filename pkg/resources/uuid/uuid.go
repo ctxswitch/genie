@@ -67,5 +67,5 @@ func (u *Uuid) uuid4() string {
 }
 
 func (u *Uuid) cached() string {
-	return u.cache[rand.Intn(len(u.cache))]
+	return u.cache[rand.Intn(len(u.cache))] //nolint:gosec
 }

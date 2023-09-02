@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"ctx.sh/apex"
 	"ctx.sh/genie/pkg/config"
+	"ctx.sh/strata"
 	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
 )
@@ -17,7 +17,7 @@ var (
 
 type GlobalOpts struct {
 	Logger      logr.Logger
-	Metrics     *apex.Metrics
+	Metrics     *strata.Metrics
 	BaseContext context.Context
 	CancelFunc  context.CancelFunc
 	Config      config.ConfigBlock
@@ -25,7 +25,7 @@ type GlobalOpts struct {
 
 type Root struct {
 	logger  logr.Logger
-	metrics *apex.Metrics
+	metrics *strata.Metrics
 	ctx     context.Context
 	cancel  context.CancelFunc
 	config  config.ConfigBlock

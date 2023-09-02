@@ -8,9 +8,9 @@ import (
 	"sync"
 	"syscall"
 
-	"ctx.sh/apex"
 	"ctx.sh/genie/pkg/cmd"
 	"ctx.sh/genie/pkg/config"
+	"ctx.sh/strata"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -38,11 +38,11 @@ func main() {
 		},
 	}
 	zl := zap.Must(zapCfg.Build())
-	defer zl.Sync()
+	defer zl.Sync() //nolint:errcheck
 
 	// Metrics
 	logger := zapr.NewLogger(zl)
-	metrics := apex.New(apex.MetricsOpts{
+	metrics := strata.New(strata.MetricsOpts{
 		Logger:       logger,
 		Prefix:       []string{"genie"},
 		PanicOnError: true,
@@ -52,7 +52,7 @@ func main() {
 	obs.Add(1)
 	go func() {
 		defer obs.Done()
-		err := metrics.Start(apex.ServerOpts{
+		err := metrics.Start(strata.ServerOpts{
 			Port: 9090,
 		})
 		if err != nil && err != http.ErrServerClosed {

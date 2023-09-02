@@ -17,7 +17,7 @@ var builtins = map[string]TokenType{
 	"join":       TokenFilter,
 	"env":        TokenFilter,
 	"escape":     TokenFilter,
-	"default":    TokenFilter, // Maybe, this seems unnecesary
+	"default":    TokenFilter, // Maybe, this seems unnecessary
 	"minimize":   TokenFilter,
 	"replace":    TokenFilter,
 	"length":     TokenFilter,
