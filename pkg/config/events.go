@@ -31,6 +31,10 @@ func (e *EventBlock) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
+	if out.Sinks == nil {
+		out.Sinks = []string{"stdout"}
+	}
+
 	evt := EventBlock(out)
 
 	*e = evt

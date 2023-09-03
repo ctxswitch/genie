@@ -88,21 +88,25 @@ func (g *Generate) RunE(cmd *cobra.Command, args []string) error {
 			continue
 		}
 
-		if v.Sinks == nil {
-			v.Sinks = append(v.Sinks, "stdout")
-		}
-
+		// This is interesting... We need to send multiple send channels to the generator.
+		// I can see the need for passing the same event for comparison to multiple sinks so
+		// we don't just want to start up multiple generators.  However, we'll also need to
+		// send those non-blocking if we can as to not impact the other sinks if something
+		// goes down.
 		for n, s := range v.Sinks {
-			sink, err := snks.Get(s)
+			sendChan, err := snks.Get(s)
 			if err != nil {
 				g.logger.Error(err, "sink load failed", "event", k, "sink", n)
 				continue
 			}
 
 			// TODO: impl num generators
-			m.Add(k, tmpl, sink)
+			m.Add(k, tmpl, sendChan)
 		}
 	}
+
+	g.logger.Info("starting sinks")
+	snks.StartAll(g.ctx)
 
 	g.logger.Info("starting manager")
 	if err := m.Start(g.ctx); err != nil {

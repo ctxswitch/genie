@@ -2,8 +2,10 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
+	"sync"
 	"time"
 
 	"ctx.sh/genie/pkg/resources"
@@ -17,60 +19,57 @@ type HTTP struct {
 	timeout time.Duration
 	method  string
 	// logger  *zap.Logger
+	sendChan chan []byte
+	stopChan chan struct{}
+	stopOnce sync.Once
 }
 
 func New() *HTTP {
 	return &HTTP{
-		url:     DefaultHttpUrl,
-		method:  DefaultMethod,
-		headers: make(map[string]any, 0),
+		url:      DefaultHttpUrl,
+		method:   DefaultMethod,
+		headers:  make(map[string]any, 0),
+		sendChan: make(chan []byte),
+		stopChan: make(chan struct{}),
 	}
 }
 
-func (h *HTTP) Connect() {
-	tr := &http.Transport{
-		// TODO: make configurable and add parallel sends
-		MaxIdleConns:       10,
-		IdleConnTimeout:    30 * time.Second,
-		DisableKeepAlives:  false,
-		DisableCompression: false,
-	}
+func (h *HTTP) Init() error {
+	h.sendChan = make(chan []byte)
+	h.stopChan = make(chan struct{})
+
 	h.client = http.Client{
-		Timeout:   h.timeout,
-		Transport: tr,
+		Timeout: h.timeout,
+		Transport: &http.Transport{
+			// TODO: make configurable for connecction pooling
+			MaxIdleConns:       10,
+			IdleConnTimeout:    30 * time.Second,
+			DisableKeepAlives:  false,
+			DisableCompression: false,
+		},
 	}
-}
 
-func (h *HTTP) Init() {}
-
-func (h *HTTP) Name() string {
-	return "http"
-}
-
-func (h *HTTP) Send(data []byte) error {
-	// TODO: backoff handling on error
-	return h.send(data)
-}
-
-func (h *HTTP) Validate() error {
 	return nil
 }
 
-func (h *HTTP) WithMethod(method string) *HTTP {
-	h.method = method
-	return h
+func (h *HTTP) Start(ctx context.Context) {
+	h.start(ctx)
 }
 
-func (h *HTTP) WithURL(url string) *HTTP {
-	h.url = url
-	return h
+func (h *HTTP) start(ctx context.Context) {
+	for {
+		select {
+		case <-h.stopChan:
+			return
+		case <-ctx.Done():
+			return
+		case d := <-h.sendChan:
+			h.send(d)
+		}
+	}
 }
 
-func (h *HTTP) WithHeader(name string, value any) *HTTP {
-	h.headers[name] = value
-	return h
-}
-
+// TODO: this is still going to be blocking. I need to make this async.
 func (h *HTTP) send(data []byte) error {
 	req, err := http.NewRequest(h.method, h.url, bytes.NewBuffer(data))
 	if err != nil {
@@ -85,7 +84,7 @@ func (h *HTTP) send(data []byte) error {
 		case string:
 			val = h
 		default:
-			// log
+			// log and then remove the invalid header
 			continue
 		}
 
@@ -106,4 +105,29 @@ func (h *HTTP) send(data []byte) error {
 	}
 
 	return nil
+}
+
+func (h *HTTP) Stop() {
+	h.stopOnce.Do(func() {
+		close(h.stopChan)
+	})
+}
+
+func (h *HTTP) WithMethod(method string) *HTTP {
+	h.method = method
+	return h
+}
+
+func (h *HTTP) WithURL(url string) *HTTP {
+	h.url = url
+	return h
+}
+
+func (h *HTTP) WithHeader(name string, value any) *HTTP {
+	h.headers[name] = value
+	return h
+}
+
+func (h *HTTP) SendChannel() chan<- []byte {
+	return h.sendChan
 }

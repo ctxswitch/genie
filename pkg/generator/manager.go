@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"ctx.sh/genie/pkg/sinks"
 	"ctx.sh/genie/pkg/template"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
@@ -36,10 +35,12 @@ func (m *Manager) WithMetrics(metrics *strata.Metrics) *Manager {
 	return m
 }
 
-func (m *Manager) Add(name string, tmpl *template.Template, sink sinks.Sink) {
-	g := NewGenerator(name, tmpl, sink).
+func (m *Manager) Add(name string, tmpl *template.Template, send chan<- []byte) {
+	g := NewGenerator(name).
+		WithTemplate(tmpl).
 		WithLogger(m.logger).
-		WithMetrics(m.metrics)
+		WithMetrics(m.metrics).
+		WithSendChannel(send)
 	m.generators[name] = g
 }
 

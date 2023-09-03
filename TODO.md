@@ -14,7 +14,7 @@
 ### Template
 * [x] Variable refactor/extraction
 * [x] New system for variable scoping
-* [] Introduce scoped variables to templates.  They won't come into play until loops/conditions
+* [x] Introduce scoped variables to templates.  They won't come into play until loops/conditions
 * [] Support integers, floats, and boolean values
 * [] Expressions support for values other than strings
 * [] Add for loop with variable scoping

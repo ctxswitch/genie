@@ -1,8 +1,10 @@
 package sinks
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"sync"
 
 	"ctx.sh/genie/pkg/config"
 	"ctx.sh/genie/pkg/resources"
@@ -11,14 +13,16 @@ import (
 )
 
 type Sink interface {
-	Send([]byte) error
-	Connect()
-	Init()
-	Name() string
+	Init() error
+	SendChannel() chan<- []byte
+	Start(context.Context)
+	Stop()
 }
 
 type Sinks struct {
-	HTTP map[string]Sink
+	Stdout Sink
+	HTTP   map[string]Sink
+	wg     sync.WaitGroup
 }
 
 func ParseSinks(block config.SinksBlock, res *resources.Resources) (*Sinks, error) {
@@ -27,8 +31,12 @@ func ParseSinks(block config.SinksBlock, res *resources.Resources) (*Sinks, erro
 		return nil, err
 	}
 
+	stdoutSink := stdout.New()
+	stdoutSink.Init()
+
 	return &Sinks{
-		HTTP: httpSinks,
+		Stdout: stdoutSink,
+		HTTP:   httpSinks,
 	}, nil
 }
 
@@ -57,15 +65,45 @@ func parseHttpSinks(out config.SinksBlock, res *resources.Resources) (map[string
 			} else {
 				sink.WithHeader(h.Name, h.Value)
 			}
-
-			sinks[k] = sink
 		}
+		err := sink.Init()
+		if err != nil {
+			// log
+			continue
+		}
+		sinks[k] = sink
 	}
 
 	return sinks, nil
 }
 
-func (s *Sinks) Get(sink string) (Sink, error) {
+func (s *Sinks) StartAll(ctx context.Context) {
+	s.wg.Add(1)
+	go func() {
+		defer s.wg.Done()
+		s.Stdout.Start(ctx)
+	}()
+
+	for _, v := range s.HTTP {
+		s.wg.Add(1)
+		go func(v Sink) {
+			defer s.wg.Done()
+			v.Start(ctx)
+		}(v)
+	}
+}
+
+func (s *Sinks) StopAll() {
+	s.Stdout.Stop()
+	for _, v := range s.HTTP {
+		v.Stop()
+	}
+
+	s.wg.Wait()
+}
+
+// TODO: no more passing sinks around, we just pass the send channel back.
+func (s *Sinks) Get(sink string) (chan<- []byte, error) {
 	var kind, name string
 
 	parts := strings.SplitN(sink, ".", 2)
@@ -79,10 +117,10 @@ func (s *Sinks) Get(sink string) (Sink, error) {
 	switch kind {
 	case "http":
 		if v, ok := s.HTTP[name]; ok {
-			return v, nil
+			return v.SendChannel(), nil
 		}
 		return nil, fmt.Errorf("sink not found: %s", name)
 	default:
-		return &stdout.Stdout{}, nil
+		return s.Stdout.SendChannel(), nil
 	}
 }
