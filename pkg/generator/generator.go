@@ -20,27 +20,36 @@ type Generator struct {
 	logger  logr.Logger
 	metrics *strata.Metrics
 
+	sendChan chan<- []byte
 	stopChan chan struct{}
 	stopOnce sync.Once
 }
 
-func NewGenerator(name string, tmpl *template.Template, sink sinks.Sink) *Generator {
+func NewGenerator(name string) *Generator {
 	return &Generator{
-		Template: tmpl,
-		// fix me
-		Sink: sink,
+		// TODO: make me configurable
 		Rate: time.Second,
 		Name: name,
 	}
 }
 
+func (g *Generator) WithTemplate(tmpl *template.Template) *Generator {
+	g.Template = tmpl
+	return g
+}
+
+func (g *Generator) WithSendChannel(send chan<- []byte) *Generator {
+	g.sendChan = send
+	return g
+}
+
 func (g *Generator) WithLogger(logger logr.Logger) *Generator {
-	g.logger = logger.V(3).WithValues("sink", g.Sink.Name(), "template", g.Name)
+	g.logger = logger.V(3).WithValues("template", g.Name)
 	return g
 }
 
 func (g *Generator) WithMetrics(metrics *strata.Metrics) *Generator {
-	g.metrics = metrics.WithPrefix("generator").WithLabels("name", "sink")
+	g.metrics = metrics.WithPrefix("generator")
 	return g
 }
 
@@ -48,22 +57,12 @@ func (g *Generator) run(ctx context.Context) {
 	ticker := time.NewTicker(g.Rate)
 	defer ticker.Stop()
 
-	// Connect needs a error returned and then we need to
-	// figure out what the default behavior is.
-	g.Sink.Connect()
-
 	for {
 		select {
 		case <-ticker.C:
-			g.metrics.CounterInc("run", g.Name, g.Sink.Name())
+			g.metrics.CounterInc("run")
 			p := g.Template.Execute()
-			err := g.Sink.Send([]byte(p))
-			if err != nil {
-				g.metrics.CounterInc("send_error", g.Name, g.Sink.Name())
-				g.logger.Error(err, "send error", g.Name, g.Sink.Name())
-			} else {
-				g.metrics.CounterInc("send_success", g.Name, g.Sink.Name())
-			}
+			g.sendChan <- []byte(p)
 		case <-g.stopChan:
 			return
 		case <-ctx.Done():
