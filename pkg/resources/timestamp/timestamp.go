@@ -3,8 +3,6 @@ package timestamp
 import (
 	"fmt"
 	"time"
-
-	"ctx.sh/genie/pkg/timestamp"
 )
 
 type Timestamp struct {
@@ -15,18 +13,18 @@ type Timestamp struct {
 	// rfc3999nano, unix, and unixnano.
 	format    string
 	timestamp string
-	provider  timestamp.TimestampProvider
+	provider  TimestampProvider
 }
 
 func New(cfg Config) *Timestamp {
 	return &Timestamp{
 		format:    cfg.Format,
 		timestamp: cfg.Timestamp,
-		provider:  timestamp.RealTime{},
+		provider:  RealTime{},
 	}
 }
 
-func (t *Timestamp) WithProvider(provider timestamp.TimestampProvider) *Timestamp {
+func (t *Timestamp) WithProvider(provider TimestampProvider) *Timestamp {
 	t.provider = provider
 	return t
 }
