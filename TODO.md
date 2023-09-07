@@ -10,6 +10,7 @@
 ### Resources
 * [] Allow integer ranges to use gaussian distribution to output numbers between the min and max
 * [] New IP resource, build out database (whether it's csv or sqlite) and use some sort of weighted random selection based on the number of ips in a subnet, then random from the min/max of the range.  User would be able to specify region(s).
+* [] The timestamp package can now move into the resource since config is handled there.
 
 ### Template
 * [x] Variable refactor/extraction
@@ -33,6 +34,8 @@
 
 ### Encoding
 * [] Create encoders for the events.  Still don't have them planned out, but they would allow custom/builtin encoding i.e. json bytes, msgpack, etc.
+* [] statsd encoder
+* [] fluentbit specific encoder
 
 ### Maps
 * [] Line out the purpose of maps within the current structure.  At this point I'm not sure that I need them.
