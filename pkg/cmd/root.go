@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"ctx.sh/genie/pkg/config"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
@@ -20,7 +19,6 @@ type GlobalOpts struct {
 	Metrics     *strata.Metrics
 	BaseContext context.Context
 	CancelFunc  context.CancelFunc
-	Config      config.ConfigBlock
 }
 
 type Root struct {
@@ -28,7 +26,6 @@ type Root struct {
 	metrics *strata.Metrics
 	ctx     context.Context
 	cancel  context.CancelFunc
-	config  config.ConfigBlock
 }
 
 func NewRoot(opts *GlobalOpts) *Root {
@@ -37,7 +34,6 @@ func NewRoot(opts *GlobalOpts) *Root {
 		metrics: opts.Metrics,
 		ctx:     opts.BaseContext,
 		cancel:  opts.CancelFunc,
-		config:  opts.Config,
 	}
 }
 
@@ -67,10 +63,10 @@ func (r *Root) Command() *cobra.Command {
 		Metrics:     r.metrics,
 		BaseContext: r.ctx,
 		CancelFunc:  r.cancel,
-		Config:      r.config,
 	}
 
 	rootCmd.AddCommand(NewGenerate(opts).Command())
+	rootCmd.PersistentFlags().StringP("config", "c", "./genie.d", "config file (default is $HOME/.genie.yaml)")
 
 	return rootCmd
 }

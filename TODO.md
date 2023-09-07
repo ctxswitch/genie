@@ -28,7 +28,8 @@
 * [] Implement kafka sink
 * [] Implement backoff for HTTP(s) sinks
 * [] Add sink overrides from the command.  Not a big deal right now, but we could use that for sending to stdout or another test endpoint while a developer is building/testing the events.
-* [] Maybe (leaning heavily to this): Sinks should be able to pool requests from multiple generators.  This would mean that sinks would be shared across all events.  This would make sense from a resource perspective as to not overwhelm an endpoint, but that also means that the sinks would be independent and we run them independently from the generators.
+* [x] Maybe (leaning heavily to this): Sinks should be able to pool requests from multiple generators.  This would mean that sinks would be shared across all events.  This would make sense from a resource perspective as to not overwhelm an endpoint, but that also means that the sinks would be independent and we run them independently from the generators.
+* [] Make connection pool workers for sinks that share the client (http specifically), stdout doesn't really want or need it.
 
 ### Encoding
 * [] Create encoders for the events.  Still don't have them planned out, but they would allow custom/builtin encoding i.e. json bytes, msgpack, etc.

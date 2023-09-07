@@ -1,13 +1,18 @@
-package config
+package resources
 
 import (
 	"testing"
 
+	"ctx.sh/genie/pkg/resources/integer_range"
+	"ctx.sh/genie/pkg/resources/list"
+	"ctx.sh/genie/pkg/resources/random_string"
+	"ctx.sh/genie/pkg/resources/timestamp"
+	"ctx.sh/genie/pkg/resources/uuid"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 )
 
-func TestResources(t *testing.T) {
+func TestConfigLoad(t *testing.T) {
 	in := `
 integer_ranges:
   range1:
@@ -29,39 +34,39 @@ uuids:
   id:
     type: uuid4
 `
-	cfg := &ResourcesBlock{}
+	cfg := &Config{}
 	err := yaml.Unmarshal([]byte(in), cfg)
 	assert.Nil(t, err)
 
-	expected := &ResourcesBlock{
-		IntegerRanges: map[string]IntegerRangeBlock{
+	expected := &Config{
+		IntegerRanges: map[string]integer_range.Config{
 			"range1": {
 				Min:  1,
 				Max:  5,
 				Pad:  3,
-				Step: DefaultIntegerRangeStep,
+				Step: integer_range.DefaultIntegerRangeStep,
 			},
 		},
-		Lists: map[string]ListBlock{
+		Lists: map[string]list.Config{
 			"numbers": []string{"one", "two", "three"},
 		},
-		RandomStrings: map[string]RandomStringBlock{
+		RandomStrings: map[string]random_string.Config{
 			"hax": {
-				Size:    DefaultRandomStringSize,
-				Chars:   RandomStringHexChars,
-				Uniques: DefaultRandomStringUniques,
+				Size:    random_string.DefaultRandomStringSize,
+				Chars:   random_string.RandomStringHexChars,
+				Uniques: random_string.DefaultRandomStringUniques,
 			},
 		},
-		Timestamps: map[string]TimestampBlock{
+		Timestamps: map[string]timestamp.Config{
 			"now": {
 				Format:    "rfc3339nano",
 				Timestamp: "",
 			},
 		},
-		Uuids: map[string]UuidBlock{
+		Uuids: map[string]uuid.Config{
 			"id": {
 				Type:    "uuid4",
-				Uniques: DefaultUuidUniques,
+				Uniques: uuid.DefaultUuidUniques,
 			},
 		},
 	}
@@ -82,13 +87,13 @@ lists:
     - three
     - four
 `
-	cfg := &ResourcesBlock{}
+	cfg := &Config{}
 	err := yaml.Unmarshal([]byte(in), cfg)
 	assert.Nil(t, err)
 
-	expected := &ResourcesBlock{
+	expected := &Config{
 		IntegerRanges: nil,
-		Lists: map[string]ListBlock{
+		Lists: map[string]list.Config{
 			"numbers": []string{"two", "three", "four"},
 		},
 		RandomStrings: nil,
@@ -102,14 +107,14 @@ lists:
 
 func TestDefaultedIntegerRange(t *testing.T) {
 	in := "min: 0"
-	cfg := &IntegerRangeBlock{}
+	cfg := &integer_range.Config{}
 	err := yaml.Unmarshal([]byte(in), cfg)
 	assert.Nil(t, err)
 
-	assert.Equal(t, DefaultIntegerRangeMax, cfg.Max)
-	assert.Equal(t, DefaultIntegerRangeMin, cfg.Min)
-	assert.Equal(t, DefaultIntegerRangePad, cfg.Pad)
-	assert.Equal(t, DefaultIntegerRangeStep, cfg.Step)
+	assert.Equal(t, integer_range.DefaultIntegerRangeMax, cfg.Max)
+	assert.Equal(t, integer_range.DefaultIntegerRangeMin, cfg.Min)
+	assert.Equal(t, integer_range.DefaultIntegerRangePad, cfg.Pad)
+	assert.Equal(t, integer_range.DefaultIntegerRangeStep, cfg.Step)
 }
 
 func TestIntegerRange(t *testing.T) {
@@ -133,7 +138,7 @@ func TestIntegerRange(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		cfg := &IntegerRangeBlock{}
+		cfg := &integer_range.Config{}
 		err := yaml.Unmarshal([]byte(tt.input), cfg)
 		if tt.valid {
 			assert.Nil(t, err, tt.input)
@@ -153,7 +158,7 @@ func TestList(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		var cfg ListBlock
+		var cfg list.Config
 		err := yaml.Unmarshal([]byte(tt.input), &cfg)
 		if tt.valid {
 			assert.Nil(t, err, tt.input)
@@ -180,7 +185,7 @@ func TestRandomStringSizeUnique(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		cfg := &RandomStringBlock{}
+		cfg := &random_string.Config{}
 		err := yaml.Unmarshal([]byte(tt.input), cfg)
 		if tt.valid {
 			assert.Nil(t, err, tt.input)
@@ -195,15 +200,15 @@ func TestRandomStringChars(t *testing.T) {
 		input string
 		chars []rune
 	}{
-		{"chars: alpha", RandomStringAlphaChars},
-		{"chars: numeric", RandomStringNumericChars},
-		{"chars: hex", RandomStringHexChars},
-		{"chars: alphanum", append(RandomStringAlphaChars, RandomStringNumericChars...)},
+		{"chars: alpha", random_string.RandomStringAlphaChars},
+		{"chars: numeric", random_string.RandomStringNumericChars},
+		{"chars: hex", random_string.RandomStringHexChars},
+		{"chars: alphanum", append(random_string.RandomStringAlphaChars, random_string.RandomStringNumericChars...)},
 		{"chars: abcdef!@#$12345", []rune("abcdef!@#$12345")},
 	}
 
 	for _, tt := range tests {
-		cfg := &RandomStringBlock{}
+		cfg := &random_string.Config{}
 		err := yaml.Unmarshal([]byte(tt.input), cfg)
 		assert.Nil(t, err, tt.input)
 		assert.EqualValues(t, tt.chars, cfg.Chars)
@@ -221,7 +226,7 @@ func TestUuid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		cfg := &UuidBlock{}
+		cfg := &uuid.Config{}
 		err := yaml.Unmarshal([]byte(tt.input), cfg)
 		if tt.valid {
 			assert.Nil(t, err, tt.input)

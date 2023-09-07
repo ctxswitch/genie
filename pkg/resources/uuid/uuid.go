@@ -3,7 +3,6 @@ package uuid
 import (
 	"math/rand"
 
-	"ctx.sh/genie/pkg/config"
 	"github.com/google/uuid"
 )
 
@@ -15,12 +14,12 @@ type Uuid struct {
 	cache   []string
 }
 
-func New(settings config.UuidBlock) *Uuid {
+func New(cfg Config) *Uuid {
 	u := &Uuid{
-		uniques: settings.Uniques,
+		uniques: cfg.Uniques,
 	}
 
-	u.setFn(settings.Type)
+	u.setFn(cfg.Type)
 	return u
 }
 

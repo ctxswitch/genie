@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"ctx.sh/genie/pkg/config"
 	"ctx.sh/genie/pkg/timestamp"
 )
 
@@ -19,10 +18,10 @@ type Timestamp struct {
 	provider  timestamp.TimestampProvider
 }
 
-func New(settings config.TimestampBlock) *Timestamp {
+func New(cfg Config) *Timestamp {
 	return &Timestamp{
-		format:    settings.Format,
-		timestamp: settings.Timestamp,
+		format:    cfg.Format,
+		timestamp: cfg.Timestamp,
 		provider:  timestamp.RealTime{},
 	}
 }

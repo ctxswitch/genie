@@ -3,12 +3,11 @@ package variables
 import (
 	"testing"
 
-	"ctx.sh/genie/pkg/config"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestParse(t *testing.T) {
-	vars, err := Parse([]config.VariableBlock{
+	vars, err := Parse([]Config{
 		{Name: "name", Value: "Dwight Schrute"},
 	})
 	assert.NoError(t, err)

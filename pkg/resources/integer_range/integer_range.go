@@ -3,8 +3,6 @@ package integer_range
 import (
 	"fmt"
 	"math/rand"
-
-	"ctx.sh/genie/pkg/config"
 )
 
 type IntegerRange struct {
@@ -15,12 +13,12 @@ type IntegerRange struct {
 	cache []string
 }
 
-func New(settings config.IntegerRangeBlock) *IntegerRange {
+func New(cfg Config) *IntegerRange {
 	return &IntegerRange{
-		min:  settings.Min,
-		max:  settings.Max,
-		step: settings.Step,
-		pad:  settings.Pad,
+		min:  cfg.Min,
+		max:  cfg.Max,
+		step: cfg.Step,
+		pad:  cfg.Pad,
 	}
 }
 

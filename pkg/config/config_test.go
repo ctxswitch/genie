@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/go-logr/logr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -14,6 +15,9 @@ func TestLoadAll(t *testing.T) {
 	require.NoError(t, err)
 
 	dir := fmt.Sprintf("%s/../../genie.d", path)
-	_, err = Load([]string{dir})
+	_, err = Load(&LoadOptions{
+		Paths:  []string{dir},
+		Logger: logr.Discard(),
+	})
 	assert.NoError(t, err)
 }

@@ -13,17 +13,19 @@ import (
 type Template struct {
 	root  Root
 	paths []string
-	// This could end up being any in the future
-	vars      *variables.ScopedVariables
-	resources *resources.Resources
 }
 
 func NewTemplate() *Template {
 	return &Template{}
 }
 
+func (t *Template) WithPaths(paths []string) *Template {
+	t.paths = paths
+	return t
+}
+
 func (t *Template) Compile(input string) error {
-	parser := NewParser(input, t.resources)
+	parser := NewParser(input)
 	root, err := parser.Parse()
 	if err != nil {
 		return err
@@ -63,27 +65,16 @@ func (t *Template) CompileFrom(file string) error {
 	return fmt.Errorf("template does not exist in search path: %s", file)
 }
 
-func (t *Template) WithPaths(p []string) *Template {
-	t.paths = p
-	return t
+// Will we have any errors on execute?  Can I pass resources and variables here?
+// It would decouple them from the complile stage which would mean that we could
+// compile before we have the resources and variables (variables would be pulled
+// in with events).  It's going to be required if we allow our templates to be used
+// in other configurations (i.e. sinks).
+func (t *Template) Execute(res *resources.Resources, vars *variables.Variables) string {
+	return t.eval(t.root, res, variables.NewScopedVariables(vars))
 }
 
-func (t *Template) WithResources(r *resources.Resources) *Template {
-	t.resources = r
-	return t
-}
-
-func (t *Template) WithVariables(vars *variables.Variables) *Template {
-	t.vars = variables.NewScopedVariables(vars)
-	return t
-}
-
-// Will we have any errors on execute?
-func (t *Template) Execute() string {
-	return t.eval(t.root)
-}
-
-func (t *Template) eval(root Root) string {
+func (t *Template) eval(root Root, res *resources.Resources, vars *variables.ScopedVariables) string {
 	var out strings.Builder
 
 	for _, node := range root.Nodes {
@@ -94,22 +85,16 @@ func (t *Template) eval(root Root) string {
 			// Do nothing right now, but I'm thinking that I want to potentially
 			// use those for log points.
 		case *Expression:
-			s := n.WithVars(t.vars).String()
-			if n.Filter != nil {
-				s = n.Filter(s)
-			}
+			s := n.WithVariables(vars).WithResources(res).String()
 			out.WriteString(s)
 		case *LetStatement:
-			exp := n.Expression.(*Expression)
-			e := exp.WithVars(t.vars).String()
-			if exp.Filter != nil {
-				e = exp.Filter(e)
-			}
-			t.vars.Set(n.Identifier, e)
+			exp := n.Expression.(*Expression).WithVariables(n.Vars).WithResources(res)
+			e := exp.String()
+			vars.Set(n.Identifier, e)
 		default:
 			out.WriteString(n.String())
 		}
 	}
 
-	return out.String()
+	return strings.TrimSpace(out.String())
 }

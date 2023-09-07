@@ -1,4 +1,4 @@
-package config
+package sinks
 
 import (
 	"testing"
@@ -22,19 +22,18 @@ headers:
 url: http://localhost:3000
 headers:
   - name: X-Request-Id
-    resource: uuid.request_id
+    value: << uuid.request_id >>
 `, true},
 		{`
 url: http://localhost:3000
 headers:
   - name: X-Request-Id
     value: 000000000000000000
-    resource: uuid.request_id
-`, false},
+`, true},
 	}
 
 	for _, tt := range tests {
-		cfg := &HttpBlock{}
+		cfg := &Config{}
 		err := yaml.Unmarshal([]byte(tt.input), cfg)
 		if tt.valid {
 			assert.Nil(t, err, tt.input)

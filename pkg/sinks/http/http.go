@@ -9,26 +9,31 @@ import (
 	"time"
 
 	"ctx.sh/genie/pkg/resources"
+	"ctx.sh/genie/pkg/variables"
 )
 
 type HTTP struct {
 	url     string
-	headers map[string]any
+	headers Headers
 	client  http.Client
-	// backoff time.Duration
 	timeout time.Duration
 	method  string
+	// backoff time.Duration
 	// logger  *zap.Logger
+
+	resources *resources.Resources
+	variables *variables.Variables
+
 	sendChan chan []byte
 	stopChan chan struct{}
 	stopOnce sync.Once
 }
 
-func New() *HTTP {
+func New(cfg Config) *HTTP {
 	return &HTTP{
-		url:      DefaultHttpUrl,
-		method:   DefaultMethod,
-		headers:  make(map[string]any, 0),
+		url:      cfg.Url,
+		method:   cfg.Method,
+		headers:  newHeaders(cfg.Headers),
 		sendChan: make(chan []byte),
 		stopChan: make(chan struct{}),
 	}
@@ -77,18 +82,7 @@ func (h *HTTP) send(data []byte) error {
 	}
 
 	for k, v := range h.headers {
-		var val string
-		switch h := v.(type) {
-		case resources.Resource:
-			val = h.Get()
-		case string:
-			val = h
-		default:
-			// log and then remove the invalid header
-			continue
-		}
-
-		req.Header.Set(k, val)
+		req.Header.Set(k, v.Execute(h.resources, h.variables))
 	}
 
 	resp, err := h.client.Do(req)
@@ -111,21 +105,6 @@ func (h *HTTP) Stop() {
 	h.stopOnce.Do(func() {
 		close(h.stopChan)
 	})
-}
-
-func (h *HTTP) WithMethod(method string) *HTTP {
-	h.method = method
-	return h
-}
-
-func (h *HTTP) WithURL(url string) *HTTP {
-	h.url = url
-	return h
-}
-
-func (h *HTTP) WithHeader(name string, value any) *HTTP {
-	h.headers[name] = value
-	return h
 }
 
 func (h *HTTP) SendChannel() chan<- []byte {

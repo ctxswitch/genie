@@ -9,7 +9,6 @@ import (
 	"syscall"
 
 	"ctx.sh/genie/pkg/cmd"
-	"ctx.sh/genie/pkg/config"
 	"ctx.sh/strata"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
@@ -25,9 +24,10 @@ func main() {
 	encoderCfg.EncodeTime = zapcore.RFC3339NanoTimeEncoder
 	zapCfg := zap.Config{
 		// TODO: make me configurable
-		Level:             zap.NewAtomicLevelAt(zap.InfoLevel),
-		Development:       false,
-		DisableStacktrace: false,
+		Level:       zap.NewAtomicLevelAt(zap.InfoLevel),
+		Development: false,
+		// TODO: enable this for debug mode
+		DisableStacktrace: true,
 		Sampling:          nil,
 		Encoding:          "console",
 		EncoderConfig:     encoderCfg,
@@ -62,19 +62,11 @@ func main() {
 		}
 	}()
 
-	// Fix me
-	cfg, err := config.Load([]string{"./genie.d"})
-	if err != nil {
-		logger.Error(err, "unable to load configuration")
-		os.Exit(1)
-	}
-
 	root := cmd.NewRoot(&cmd.GlobalOpts{
 		Logger:      logger,
 		Metrics:     metrics,
 		BaseContext: ctx,
 		CancelFunc:  cancel,
-		Config:      cfg,
 	})
 	root.Execute()
 
