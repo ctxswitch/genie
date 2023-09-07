@@ -2,16 +2,14 @@ package list
 
 import (
 	"math/rand"
-
-	"ctx.sh/genie/pkg/config"
 )
 
 type List struct {
 	items []string
 }
 
-func New(settings config.ListBlock) *List {
-	return &List{items: []string(settings)}
+func New(config Config) *List {
+	return &List{items: config}
 }
 
 func (l *List) WithItems(items []string) *List {

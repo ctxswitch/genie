@@ -6,10 +6,11 @@ import (
 	"strings"
 	"sync"
 
-	"ctx.sh/genie/pkg/config"
 	"ctx.sh/genie/pkg/resources"
 	"ctx.sh/genie/pkg/sinks/http"
 	"ctx.sh/genie/pkg/sinks/stdout"
+	"ctx.sh/strata"
+	"github.com/go-logr/logr"
 )
 
 type Sink interface {
@@ -19,14 +20,19 @@ type Sink interface {
 	Stop()
 }
 
+type Options struct {
+	Logger  logr.Logger
+	Metrics *strata.Metrics
+}
+
 type Sinks struct {
 	Stdout Sink
 	HTTP   map[string]Sink
 	wg     sync.WaitGroup
 }
 
-func ParseSinks(block config.SinksBlock, res *resources.Resources) (*Sinks, error) {
-	httpSinks, err := parseHttpSinks(block, res)
+func Parse(cfg Config, res *resources.Resources, opts *Options) (*Sinks, error) {
+	httpSinks, err := parseHttpSinks(cfg, res)
 	if err != nil {
 		return nil, err
 	}
@@ -40,35 +46,15 @@ func ParseSinks(block config.SinksBlock, res *resources.Resources) (*Sinks, erro
 	}, nil
 }
 
-func parseHttpSinks(out config.SinksBlock, res *resources.Resources) (map[string]Sink, error) {
+func parseHttpSinks(cfg Config, res *resources.Resources) (map[string]Sink, error) {
 	sinks := make(map[string]Sink)
 
-	for k, v := range out.Http {
-		sink := http.New().
-			WithURL(v.Url).
-			WithMethod(v.Method)
+	for k, v := range cfg.Http {
+		sink := http.New(v)
 
-		for _, h := range v.Headers {
-			// this is where I'm going to need my resources for the conversion.
-			// there may be a way to decouple this from the config process.
-			if h.Resource != "" {
-				// Split the resources
-				parts := strings.SplitN(h.Resource, ".", 2)
-				if len(parts) != 2 {
-					return nil, fmt.Errorf("invalid resource provided: %s", h.Resource)
-				}
-				r, err := res.Get(parts[0], parts[1])
-				if err != nil {
-					return nil, fmt.Errorf("resource does not exist: %s", h.Resource)
-				}
-				sink.WithHeader(h.Name, r)
-			} else {
-				sink.WithHeader(h.Name, h.Value)
-			}
-		}
 		err := sink.Init()
 		if err != nil {
-			// log
+			// TODO: log
 			continue
 		}
 		sinks[k] = sink

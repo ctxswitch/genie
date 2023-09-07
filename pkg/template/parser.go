@@ -2,7 +2,6 @@ package template
 
 import (
 	"ctx.sh/genie/pkg/filter"
-	"ctx.sh/genie/pkg/resources"
 )
 
 type ParserFunc func() (Node, error)
@@ -10,16 +9,13 @@ type ParserFunc func() (Node, error)
 type Parser struct {
 	l       *Lexer
 	parsers map[TokenType]ParserFunc
-
-	res  *resources.Resources
-	peek Token
-	curr Token
+	peek    Token
+	curr    Token
 }
 
-func NewParser(input string, res *resources.Resources) *Parser {
+func NewParser(input string) *Parser {
 	p := &Parser{
 		l:       NewLexer(input),
-		res:     res,
 		parsers: make(map[TokenType]ParserFunc),
 	}
 
@@ -77,27 +73,27 @@ func (p *Parser) parseExpression() (Node, error) {
 	var fn filter.FilterFunc
 
 	tok := p.curr
-	e := &Expression{Token: tok}
+
+	var e ExpressionNode
 
 	switch tok.Type {
 	case TokenResource:
-		rtype := p.curr.Literal
 		if err := p.nextExpect(TokenPeriod, TokenIdentifier); err != nil {
 			return nil, SyntaxError
 		}
-
-		r, err := p.res.Get(rtype, p.curr.Literal)
-		if err != nil {
-			return nil, UnknownResourceError
+		e = &Expression{
+			Token: tok,
+			Name:  p.curr.Literal,
 		}
-		e.Resource = r
+	default:
+		e = &Expression{Token: tok}
 	}
 
 	if err := p.nextExpect(TokenPipe, TokenFilter); err == nil {
 		if fn, err = filter.Lookup(p.curr.Literal); err != nil {
 			return nil, InternalError
 		}
-		e.Filter = fn
+		e.WithFilter(fn)
 	}
 
 	// Probably just need to switch here based on type?

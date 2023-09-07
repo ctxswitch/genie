@@ -1,13 +1,11 @@
 events:
-  planet_logs:
+  - name: planet_logs
     generators: 1
     vars:
       - name: version
         value: v1
     template: planet_logs.tmpl
-  raw_logs:
+  - name: raw_logs
     generators: 1
     raw: >
-      <% let left_name = list.left_names %>
-      <% let right_name = list.right_names %>
-      {"msg": "Hello <<left_name>> <<right_name>>!"}
+      <<list.left_names>> <<list.right_names>>

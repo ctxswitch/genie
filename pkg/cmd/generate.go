@@ -5,30 +5,24 @@ import (
 	"os"
 
 	"ctx.sh/genie/pkg/config"
-	"ctx.sh/genie/pkg/generator"
-	"ctx.sh/genie/pkg/resources"
-	"ctx.sh/genie/pkg/sinks"
-	"ctx.sh/genie/pkg/template"
-	"ctx.sh/genie/pkg/variables"
+	"ctx.sh/genie/pkg/events"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
 )
 
-var usage string = `generate events|event/NAME [ARG...]`
-var shortDesc string = `Start the event generator(s)`
-var longDesc string = `Start the event generator(s).  If 'events' is specified all configured
-event generators will be run on startup.  Individual events can be specified by using
-the 'event/NAME' syntax.  Generate specific arguments can be added as after the event
-specifiers`
+var usage string = `generate [NAME...] [ARG...]`
+var shortDesc string = `Start the generator for one or many events.`
+var longDesc string = `Start the generator for one or many events. By default all configured
+event generators will be run on startup. Individual events can be specified by using the event
+name. Generate specific arguments can be added as after the event name.`
 
 type Generate struct {
 	logger  logr.Logger
 	metrics *strata.Metrics
-	cfg     config.ConfigBlock
 	once    bool
 	ctx     context.Context
-	sinks   []string
+	sink    string
 }
 
 func NewGenerate(opts *GlobalOpts) *Generate {
@@ -36,80 +30,45 @@ func NewGenerate(opts *GlobalOpts) *Generate {
 		logger:  opts.Logger,
 		metrics: opts.Metrics,
 		ctx:     opts.BaseContext,
-		cfg:     opts.Config,
 	}
 }
 
 func (g *Generate) RunE(cmd *cobra.Command, args []string) error {
-	g.logger.Info("starting generator", "args", args, "config", g.cfg)
-
-	g.logger.Info("loading resources")
-	res, err := resources.Parse(g.cfg.Resources)
+	// TODO: I'm probably going to move the subsequential parsing into
+	// the objects into the load stage.
+	path := cmd.Flag("config").Value.String()
+	cfg, err := config.Load(&config.LoadOptions{
+		Paths:   []string{path},
+		Logger:  g.logger,
+		Metrics: g.metrics,
+	})
 	if err != nil {
-		g.logger.Error(err, "unable to load resources")
+		g.logger.Error(err, "unable to load configuration")
 		os.Exit(1)
 	}
 
-	g.logger.Info("loading sinks")
-	snks, err := sinks.ParseSinks(g.cfg.Sinks, res)
-	if err != nil {
-		g.logger.Error(err, "unable to load sinks")
-		os.Exit(1)
+	g.logger.Info("starting event generators", "args", args, "sink", g.sink, "once", g.once)
+
+	manager := events.NewManager(cfg.Events, &events.ManagerOptions{
+		Logger:  g.logger,
+		Metrics: g.metrics,
+		Sinks:   cfg.Sinks,
+	})
+
+	var evts []string
+	if len(args) > 0 {
+		evts = args
+	} else {
+		evts = cfg.Events.Names()
 	}
 
-	m := generator.NewManager(g.ctx).
-		WithLogger(g.logger).
-		WithMetrics(g.metrics)
-
-	g.logger.Info("loading events", "events", g.cfg.Events)
-
-	for k, v := range g.cfg.Events {
-		g.logger.Info("loading event", "event", k, "values", v)
-
-		vars, err := variables.Parse(v.Vars)
-		if err != nil {
-			g.logger.Error(err, "event load failed, invalid variables", "event", k)
-			continue
-		}
-
-		tmpl := template.NewTemplate().
-			// TODO: configure paths (use several paths + configurable in priority order)
-			WithPaths([]string{"./genie.d"}).
-			WithResources(res).
-			WithVariables(vars)
-
-		if v.Template != "" {
-			err = tmpl.CompileFrom(v.Template)
-		} else {
-			err = tmpl.Compile(v.Raw)
-		}
-		if err != nil {
-			g.logger.Error(err, "event load failed, invalid template", "event", k)
-			continue
-		}
-
-		// This is interesting... We need to send multiple send channels to the generator.
-		// I can see the need for passing the same event for comparison to multiple sinks so
-		// we don't just want to start up multiple generators.  However, we'll also need to
-		// send those non-blocking if we can as to not impact the other sinks if something
-		// goes down.
-		for n, s := range v.Sinks {
-			sendChan, err := snks.Get(s)
-			if err != nil {
-				g.logger.Error(err, "sink load failed", "event", k, "sink", n)
-				continue
-			}
-
-			// TODO: impl num generators
-			m.Add(k, tmpl, sendChan)
-		}
-	}
+	manager.Enable(evts...)
 
 	g.logger.Info("starting sinks")
-	snks.StartAll(g.ctx)
+	cfg.Sinks.StartAll(g.ctx)
 
 	g.logger.Info("starting manager")
-	if err := m.Start(g.ctx); err != nil {
+	if err := manager.Start(g.ctx); err != nil {
 		os.Exit(1)
 	}
 
@@ -118,16 +77,13 @@ func (g *Generate) RunE(cmd *cobra.Command, args []string) error {
 
 func (g *Generate) Command() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:                   usage,
-		Args:                  cobra.MinimumNArgs(1),
-		Short:                 shortDesc,
-		Long:                  longDesc,
-		RunE:                  g.RunE,
-		DisableFlagsInUseLine: true,
+		Use:   usage,
+		Short: shortDesc,
+		Long:  longDesc,
+		RunE:  g.RunE,
 	}
-	cmd.Flags().StringArrayVarP(&g.sinks, "sinks", "s", []string{}, "Override the configured sinks with the sinks provided.")
-	cmd.Flags().BoolVar(&g.once, "once", false, "Run the generator one time and exit.")
-	cmd.Flags().SetInterspersed(false)
+	cmd.PersistentFlags().StringVarP(&g.sink, "sink", "s", "", "Override the configured sinks with the sinks provided.")
+	cmd.PersistentFlags().BoolVar(&g.once, "run-once", false, "Run the generator one time and exit.")
 
 	return cmd
 }

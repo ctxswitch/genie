@@ -11,6 +11,6 @@ sinks:
         - name: X-Event-Type
           value: logging
         - name: X-Request-Id
-          resource: uuid.request_uuid
+          value: <<uuid.request_uuid>>
         - name: User-Agent
-          resource: list.user_agent
+          value: <<list.user_agent>>

@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"ctx.sh/genie/pkg/filter"
-	"ctx.sh/genie/pkg/resources"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -34,8 +33,7 @@ func TestParse(t *testing.T) {
 		}},
 		{`<< list.name >>`, []Node{
 			&Expression{
-				Token:    NewToken(TokenResource, "list"),
-				Resource: resources.MockResources().MustGet("list", "name"),
+				Token: NewToken(TokenResource, "list"),
 			},
 		}},
 		{`<% let name = list.name %>`, []Node{
@@ -43,15 +41,14 @@ func TestParse(t *testing.T) {
 				Token:      NewToken(TokenKeyword, "let"),
 				Identifier: "name",
 				Expression: &Expression{
-					Token:    NewToken(TokenResource, "list"),
-					Resource: resources.MockResources().MustGet("list", "name"),
+					Token: NewToken(TokenResource, "list"),
 				},
 			},
 		}},
 	}
 
 	for i, tt := range tests {
-		root, err := NewParser(tt.input, resources.MockResources()).Parse()
+		root, err := NewParser(tt.input).Parse()
 		require.NoError(t, err)
 		require.Len(t, tt.expected, root.Length())
 		for j, exp := range tt.expected {
@@ -59,7 +56,6 @@ func TestParse(t *testing.T) {
 			case *Expression:
 				got := root.Nodes[j].(*Expression)
 				assert.EqualValues(t, n.Token, got.Token, "test[%d]: %s", i, tt.input)
-				assert.EqualValues(t, n.Resource, got.Resource, "test[%d]: %s", i, tt.input)
 				// Get around the inability for testify to compare function pointers.
 				fn1 := runtime.FuncForPC(reflect.ValueOf(n.Filter).Pointer()).Name()
 				fn2 := runtime.FuncForPC(reflect.ValueOf(got.Filter).Pointer()).Name()

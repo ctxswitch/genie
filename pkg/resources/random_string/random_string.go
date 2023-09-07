@@ -2,8 +2,6 @@ package random_string
 
 import (
 	"math/rand"
-
-	"ctx.sh/genie/pkg/config"
 )
 
 type RandomString struct {
@@ -13,11 +11,11 @@ type RandomString struct {
 	cache   []string
 }
 
-func New(settings config.RandomStringBlock) *RandomString {
+func New(cfg Config) *RandomString {
 	return &RandomString{
-		size:    settings.Size,
-		chars:   settings.Chars,
-		uniques: settings.Uniques,
+		size:    cfg.Size,
+		chars:   cfg.Chars,
+		uniques: cfg.Uniques,
 	}
 }
 

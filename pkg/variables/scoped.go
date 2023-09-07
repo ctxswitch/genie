@@ -31,6 +31,8 @@ func (v *ScopedVariables) ExitScope() {
 	v.pos--
 }
 
+// TODO: recursively go back to get a variable from a parent scope if it doesn't
+// exist in the current scope.
 func (v *ScopedVariables) Get(name string) (string, bool) {
 	v.Lock()
 	defer v.Unlock()
@@ -38,6 +40,9 @@ func (v *ScopedVariables) Get(name string) (string, bool) {
 	return v.vars[v.pos].Get(name)
 }
 
+// TODO: recursively go back to set a variable in a parent scope if it doesn't
+// exist in the current scope.  If we get to the end of the scopes and it's
+// not found, create it in the current scope.
 func (v *ScopedVariables) Set(name, value string) error {
 	v.Lock()
 	defer v.Unlock()

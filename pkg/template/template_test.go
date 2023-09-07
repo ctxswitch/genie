@@ -22,8 +22,7 @@ Hello World
 <% let greeting = list.greeting %><< greeting >> World!
 <% let greeting = list.greeting | capitalize %><< greeting >> World!
 `
-	expected = `
-Hello World
+	expected = `Hello World
 Dwight Schrute
 Jim Halpert
 Pam Beesly
@@ -31,8 +30,7 @@ Pam Beesly
 Hello World!
 HELLO World!
 Hello World!
-HELLO World!
-`
+HELLO World!`
 )
 
 // <% minimize %>this that and the << other >><% endminimize %>
@@ -42,9 +40,7 @@ func TestTemplateParse(t *testing.T) {
 	var err error
 
 	// TODO: fix test
-	tmpl := NewTemplate().
-		WithResources(resources.MockResources()).
-		WithVariables(variables.MockVariables())
+	tmpl := NewTemplate().WithPaths([]string{})
 
 	// Something to think about.  We can look for compile time unknown variable
 	// issues by keeping track of any new variable that is set when we parse
@@ -54,6 +50,9 @@ func TestTemplateParse(t *testing.T) {
 	err = tmpl.Compile(input)
 	require.NoError(t, err)
 
-	out := tmpl.Execute()
+	res := resources.MockResources()
+	vars := variables.MockVariables()
+
+	out := tmpl.Execute(res, vars)
 	assert.Equal(t, expected, out)
 }

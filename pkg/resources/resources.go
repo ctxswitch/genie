@@ -1,16 +1,22 @@
 package resources
 
 import (
-	"ctx.sh/genie/pkg/config"
 	"ctx.sh/genie/pkg/resources/integer_range"
 	"ctx.sh/genie/pkg/resources/list"
 	"ctx.sh/genie/pkg/resources/random_string"
 	"ctx.sh/genie/pkg/resources/timestamp"
 	"ctx.sh/genie/pkg/resources/uuid"
+	"ctx.sh/strata"
+	"github.com/go-logr/logr"
 )
 
 type Resource interface {
 	Get() string
+}
+
+type Options struct {
+	Logger  logr.Logger
+	Metrics *strata.Metrics
 }
 
 type Resources struct {
@@ -22,7 +28,7 @@ type Resources struct {
 	Maps          map[string]Resource
 }
 
-func Parse(block config.ResourcesBlock) (*Resources, error) {
+func Parse(block Config, opts *Options) (*Resources, error) {
 	integerRanges, err := parseIntegerRanges(block)
 	if err != nil {
 		return nil, err
@@ -57,7 +63,7 @@ func Parse(block config.ResourcesBlock) (*Resources, error) {
 	}, nil
 }
 
-func parseIntegerRanges(res config.ResourcesBlock) (map[string]Resource, error) {
+func parseIntegerRanges(res Config) (map[string]Resource, error) {
 	out := make(map[string]Resource)
 
 	for k, v := range res.IntegerRanges {
@@ -67,7 +73,7 @@ func parseIntegerRanges(res config.ResourcesBlock) (map[string]Resource, error) 
 	return out, nil
 }
 
-func parseRandomStrings(res config.ResourcesBlock) (map[string]Resource, error) {
+func parseRandomStrings(res Config) (map[string]Resource, error) {
 	out := make(map[string]Resource)
 
 	for k, v := range res.RandomStrings {
@@ -77,7 +83,7 @@ func parseRandomStrings(res config.ResourcesBlock) (map[string]Resource, error) 
 	return out, nil
 }
 
-func parseLists(res config.ResourcesBlock) (map[string]Resource, error) {
+func parseLists(res Config) (map[string]Resource, error) {
 	out := make(map[string]Resource)
 
 	for k, v := range res.Lists {
@@ -87,7 +93,7 @@ func parseLists(res config.ResourcesBlock) (map[string]Resource, error) {
 	return out, nil
 }
 
-func parseTimestamps(res config.ResourcesBlock) (map[string]Resource, error) {
+func parseTimestamps(res Config) (map[string]Resource, error) {
 	out := make(map[string]Resource)
 
 	for k, v := range res.Timestamps {
@@ -97,7 +103,7 @@ func parseTimestamps(res config.ResourcesBlock) (map[string]Resource, error) {
 	return out, nil
 }
 
-func parseUuids(res config.ResourcesBlock) (map[string]Resource, error) {
+func parseUuids(res Config) (map[string]Resource, error) {
 	out := make(map[string]Resource)
 
 	for k, v := range res.Uuids {

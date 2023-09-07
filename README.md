@@ -56,3 +56,10 @@ truncate
 reverse
 wordwrap
 trim
+
+### generate
+
+Starts the generators for one or many resources.
+
+genie generate all (could be the default?)
+genie generate raw_logs
