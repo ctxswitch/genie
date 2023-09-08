@@ -16,7 +16,7 @@ func New() *Stdout {
 }
 
 func (s *Stdout) Init() error {
-	s.sendChan = make(chan []byte, 100)
+	s.sendChan = make(chan []byte)
 	s.fd = os.Stdout
 	return nil
 }

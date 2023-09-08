@@ -47,6 +47,7 @@ func New(cfg Config, opts *HTTPOptions) *HTTP {
 }
 
 func (h *HTTP) Init() error {
+	// TODO: evaluate use of buffered channels after we have send workers.
 	h.sendChan = make(chan []byte)
 
 	h.client = http.Client{
