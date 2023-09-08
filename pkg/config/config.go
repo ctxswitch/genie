@@ -77,7 +77,10 @@ func Load(opts *LoadOptions) (*Config, error) {
 		return nil, err
 	}
 
-	snks, err := sinks.Parse(config.Sinks, res, &sinks.Options{})
+	snks, err := sinks.Parse(config.Sinks, res, &sinks.Options{
+		Logger:  opts.Logger,
+		Metrics: opts.Metrics,
+	})
 	if err != nil {
 		opts.Logger.Error(err, "unable to parse sinks")
 		return nil, err

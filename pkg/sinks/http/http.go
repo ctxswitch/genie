@@ -2,7 +2,6 @@ package http
 
 import (
 	"bytes"
-	"context"
 	"io"
 	"net/http"
 	"sync"
@@ -10,7 +9,14 @@ import (
 
 	"ctx.sh/genie/pkg/resources"
 	"ctx.sh/genie/pkg/variables"
+	"ctx.sh/strata"
+	"github.com/go-logr/logr"
 )
+
+type HTTPOptions struct {
+	Logger  logr.Logger
+	Metrics *strata.Metrics
+}
 
 type HTTP struct {
 	url     string
@@ -19,29 +25,29 @@ type HTTP struct {
 	timeout time.Duration
 	method  string
 	// backoff time.Duration
-	// logger  *zap.Logger
+	logger  logr.Logger
+	metrics *strata.Metrics
 
 	resources *resources.Resources
 	variables *variables.Variables
 
 	sendChan chan []byte
-	stopChan chan struct{}
 	stopOnce sync.Once
 }
 
-func New(cfg Config) *HTTP {
+func New(cfg Config, opts *HTTPOptions) *HTTP {
 	return &HTTP{
 		url:      cfg.Url,
 		method:   cfg.Method,
 		headers:  newHeaders(cfg.Headers),
 		sendChan: make(chan []byte),
-		stopChan: make(chan struct{}),
+		logger:   opts.Logger,
+		metrics:  opts.Metrics,
 	}
 }
 
 func (h *HTTP) Init() error {
 	h.sendChan = make(chan []byte)
-	h.stopChan = make(chan struct{})
 
 	h.client = http.Client{
 		Timeout: h.timeout,
@@ -57,20 +63,13 @@ func (h *HTTP) Init() error {
 	return nil
 }
 
-func (h *HTTP) Start(ctx context.Context) {
-	h.start(ctx)
+func (h *HTTP) Start() {
+	h.start()
 }
 
-func (h *HTTP) start(ctx context.Context) {
-	for {
-		select {
-		case <-h.stopChan:
-			return
-		case <-ctx.Done():
-			return
-		case d := <-h.sendChan:
-			h.send(d)
-		}
+func (h *HTTP) start() {
+	for data := range h.sendChan {
+		h.send(data)
 	}
 }
 
@@ -103,7 +102,7 @@ func (h *HTTP) send(data []byte) error {
 
 func (h *HTTP) Stop() {
 	h.stopOnce.Do(func() {
-		close(h.stopChan)
+		close(h.sendChan)
 	})
 }
 

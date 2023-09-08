@@ -13,15 +13,20 @@ type ManagerOptions struct {
 	Logger  logr.Logger
 	Metrics *strata.Metrics
 	Sinks   *sinks.Sinks
+	RunOnce bool
 }
 
 type Manager struct {
 	// add logging
 	events Events
+	once   bool
 
 	logger  logr.Logger
 	metrics *strata.Metrics
 	sinks   *sinks.Sinks
+
+	wg       sync.WaitGroup
+	stopOnce sync.Once
 
 	sync.RWMutex
 }
@@ -32,6 +37,7 @@ func NewManager(events Events, opts *ManagerOptions) *Manager {
 		logger:  opts.Logger,
 		metrics: opts.Metrics,
 		sinks:   opts.Sinks,
+		once:    opts.RunOnce,
 	}
 }
 
@@ -52,10 +58,21 @@ func (m *Manager) Enable(names ...string) {
 	}
 }
 
-func (m *Manager) Start(ctx context.Context) error {
+func (m *Manager) RunOnce() {
+	for _, g := range m.events {
+		if !g.enabled {
+			continue
+		}
+
+		g.run()
+	}
+}
+
+func (m *Manager) StartAll() {
 	m.Lock()
 	defer m.Unlock()
 
+	ctx := context.Background()
 	metrics := m.metrics.WithLabels("event")
 	for n, g := range m.events {
 		if !g.enabled {
@@ -63,25 +80,23 @@ func (m *Manager) Start(ctx context.Context) error {
 			continue
 		}
 
-		if err := g.Start(ctx); err != nil {
-			m.Stop()
-			metrics.CounterInc("event_start_error", n)
-			return err
-		} else {
-			metrics.CounterInc("event_start", n)
-		}
+		m.wg.Add(1)
+		go func(g *Event) {
+			defer m.wg.Done()
+			g.Start(ctx)
+		}(g)
 	}
-
-	<-ctx.Done()
-	return nil
 }
 
-func (m *Manager) Stop() {
+func (m *Manager) StopAll() {
 	m.Lock()
 	defer m.Unlock()
 
-	for n, g := range m.events {
-		g.Stop()
-		delete(m.events, n)
-	}
+	m.stopOnce.Do(func() {
+		for _, g := range m.events {
+			g.Stop()
+		}
+
+		m.wg.Wait()
+	})
 }
