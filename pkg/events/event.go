@@ -67,6 +67,8 @@ func ParseEvent(cfg EventConfig, opts *EventOptions) (*Event, error) {
 		resources: opts.Resources,
 		logger:    opts.Logger,
 		metrics:   opts.Metrics,
+
+		stopChan: make(chan struct{}),
 	}, nil
 }
 
@@ -79,22 +81,12 @@ func (e *Event) WithSendChannel(send chan<- []byte) *Event {
 	return e
 }
 
-// func (e *Event) WithLogger(logger logr.Logger) *Event {
-// 	e.logger = logger.V(3).WithValues("event", e.name)
-// 	return e
-// }
+func (e *Event) run() {
+	p := e.template.Execute(e.resources, e.vars)
+	e.sendChan <- []byte(p)
+}
 
-// func (e *Event) WithMetrics(metrics *strata.Metrics) *Event {
-// 	e.metrics = metrics.WithPrefix("event")
-// 	return e
-// }
-
-// func (e *Event) WithResources(res *resources.Resources) *Event {
-// 	e.resources = res
-// 	return e
-// }
-
-func (e *Event) run(ctx context.Context) {
+func (e *Event) Start(ctx context.Context) {
 	ticker := time.NewTicker(time.Duration(e.rate) * time.Second)
 	defer ticker.Stop()
 
@@ -102,19 +94,15 @@ func (e *Event) run(ctx context.Context) {
 		select {
 		case <-ticker.C:
 			e.metrics.CounterInc("run")
-			p := e.template.Execute(e.resources, e.vars)
-			e.sendChan <- []byte(p)
+			e.run()
 		case <-e.stopChan:
+			e.logger.Info("stopping event")
 			return
 		case <-ctx.Done():
-			return
+			e.logger.Info("signal caught")
+			close(e.stopChan)
 		}
 	}
-}
-
-func (e *Event) Start(ctx context.Context) error {
-	go e.run(ctx)
-	return nil
 }
 
 func (e *Event) Stop() {

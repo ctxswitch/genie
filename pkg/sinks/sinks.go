@@ -1,7 +1,6 @@
 package sinks
 
 import (
-	"context"
 	"fmt"
 	"strings"
 	"sync"
@@ -16,7 +15,7 @@ import (
 type Sink interface {
 	Init() error
 	SendChannel() chan<- []byte
-	Start(context.Context)
+	Start()
 	Stop()
 }
 
@@ -28,11 +27,15 @@ type Options struct {
 type Sinks struct {
 	Stdout Sink
 	HTTP   map[string]Sink
-	wg     sync.WaitGroup
+
+	logger   logr.Logger
+	metrics  *strata.Metrics
+	wg       sync.WaitGroup
+	stopOnce sync.Once
 }
 
 func Parse(cfg Config, res *resources.Resources, opts *Options) (*Sinks, error) {
-	httpSinks, err := parseHttpSinks(cfg, res)
+	httpSinks, err := parseHttpSinks(cfg, res, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -43,19 +46,24 @@ func Parse(cfg Config, res *resources.Resources, opts *Options) (*Sinks, error) 
 	return &Sinks{
 		Stdout: stdoutSink,
 		HTTP:   httpSinks,
+
+		logger:  opts.Logger.WithName("sinks"),
+		metrics: opts.Metrics.WithPrefix("sinks"),
 	}, nil
 }
 
-func parseHttpSinks(cfg Config, res *resources.Resources) (map[string]Sink, error) {
+func parseHttpSinks(cfg Config, res *resources.Resources, opts *Options) (map[string]Sink, error) {
 	sinks := make(map[string]Sink)
 
 	for k, v := range cfg.Http {
-		sink := http.New(v)
+		sink := http.New(v, &http.HTTPOptions{
+			Logger:  opts.Logger.WithValues("type", "http", "name", k),
+			Metrics: opts.Metrics.WithPrefix("http"),
+		})
 
 		err := sink.Init()
 		if err != nil {
-			// TODO: log
-			continue
+			return nil, err
 		}
 		sinks[k] = sink
 	}
@@ -63,29 +71,34 @@ func parseHttpSinks(cfg Config, res *resources.Resources) (map[string]Sink, erro
 	return sinks, nil
 }
 
-func (s *Sinks) StartAll(ctx context.Context) {
+func (s *Sinks) StartAll() {
 	s.wg.Add(1)
 	go func() {
 		defer s.wg.Done()
-		s.Stdout.Start(ctx)
+		s.Stdout.Start()
 	}()
 
 	for _, v := range s.HTTP {
 		s.wg.Add(1)
 		go func(v Sink) {
 			defer s.wg.Done()
-			v.Start(ctx)
+			v.Start()
 		}(v)
 	}
 }
 
 func (s *Sinks) StopAll() {
-	s.Stdout.Stop()
-	for _, v := range s.HTTP {
-		v.Stop()
-	}
+	s.stopOnce.Do(func() {
+		s.logger.Info("stopping stdout sink")
+		s.Stdout.Stop()
 
-	s.wg.Wait()
+		for n, v := range s.HTTP {
+			s.logger.Info("stopping http sink", "name", n)
+			v.Stop()
+		}
+
+		s.wg.Wait()
+	})
 }
 
 // TODO: no more passing sinks around, we just pass the send channel back.

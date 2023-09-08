@@ -62,7 +62,6 @@ func (r *Root) Command() *cobra.Command {
 		Logger:      r.logger,
 		Metrics:     r.metrics,
 		BaseContext: r.ctx,
-		CancelFunc:  r.cancel,
 	}
 
 	rootCmd.AddCommand(NewGenerate(opts).Command())
