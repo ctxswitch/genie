@@ -75,6 +75,8 @@ func (m *Manager) StartAll() {
 	ctx := context.Background()
 	metrics := m.metrics.WithLabels("event")
 	for n, g := range m.events {
+		// TODO: not a fan of this, we should initially filter out the
+		// disabled events.
 		if !g.enabled {
 			metrics.CounterInc("event_disabled", n)
 			continue
@@ -94,7 +96,11 @@ func (m *Manager) StopAll() {
 
 	m.stopOnce.Do(func() {
 		for _, g := range m.events {
-			g.Stop()
+			// TODO: have a started map that we can check here
+			if g.enabled {
+				g.logger.Info("stopping event generator", "name", g.name)
+				g.Stop()
+			}
 		}
 
 		m.wg.Wait()

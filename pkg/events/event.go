@@ -33,6 +33,7 @@ type Event struct {
 
 	resources *resources.Resources
 
+	wg       sync.WaitGroup
 	sendChan chan<- []byte
 	stopChan chan struct{}
 	stopOnce sync.Once
@@ -87,6 +88,17 @@ func (e *Event) run() {
 }
 
 func (e *Event) Start(ctx context.Context) {
+	e.logger.Info("starting event generator", "count", e.generators)
+	for i := 0; i < e.generators; i++ {
+		e.wg.Add(1)
+		go func() {
+			defer e.wg.Done()
+			e.generate(ctx)
+		}()
+	}
+}
+
+func (e *Event) generate(ctx context.Context) {
 	ticker := time.NewTicker(time.Duration(e.rate) * time.Second)
 	defer ticker.Stop()
 
@@ -96,11 +108,7 @@ func (e *Event) Start(ctx context.Context) {
 			e.metrics.CounterInc("run")
 			e.run()
 		case <-e.stopChan:
-			e.logger.Info("stopping event")
 			return
-		case <-ctx.Done():
-			e.logger.Info("signal caught")
-			close(e.stopChan)
 		}
 	}
 }
@@ -109,4 +117,6 @@ func (e *Event) Stop() {
 	e.stopOnce.Do(func() {
 		close(e.stopChan)
 	})
+
+	e.wg.Wait()
 }

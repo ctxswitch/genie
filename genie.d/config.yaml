@@ -6,6 +6,6 @@ events:
         value: v1
     template: planet_logs.tmpl
   - name: raw_logs
-    generators: 1
+    generators: 10
     raw: >
       <<list.left_names>> <<list.right_names>>
