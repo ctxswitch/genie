@@ -1,11 +1,9 @@
 # TODO
 
+Tomorrow, work on import template function, replace filter, and start on the IP resource.  At the least, I'd like to get in a basic valid ip resource up and running.
+
 ### Commands
-* [] Parse the events and event/name args
-* [] Add global config args for config locations
-* [] Add run-once
-* [] Add test-config
-* [] Clean up Generate.RunE
+* [] Add test subcommand
 
 ### Resources
 * [] Allow integer ranges to use gaussian distribution to output numbers between the min and max
@@ -13,9 +11,6 @@
 * [] The timestamp package can now move into the resource since config is handled there.
 
 ### Template
-* [x] Variable refactor/extraction
-* [x] New system for variable scoping
-* [x] Introduce scoped variables to templates.  They won't come into play until loops/conditions
 * [] Support integers, floats, and boolean values
 * [] Expressions support for values other than strings
 * [] Add for loop with variable scoping
@@ -29,7 +24,6 @@
 * [] Implement kafka sink
 * [] Implement backoff for HTTP(s) sinks
 * [] Add sink overrides from the command.  Not a big deal right now, but we could use that for sending to stdout or another test endpoint while a developer is building/testing the events.
-* [x] Maybe (leaning heavily to this): Sinks should be able to pool requests from multiple generators.  This would mean that sinks would be shared across all events.  This would make sense from a resource perspective as to not overwhelm an endpoint, but that also means that the sinks would be independent and we run them independently from the generators.
 * [] Make connection pool workers for sinks that share the client (http specifically), stdout doesn't really want or need it.
 
 ### Encoding
@@ -43,11 +37,8 @@
 * [] Implement a map to json string filter.
 
 ### Fixes
-* [] vars are not allocated automatically before execute, so panic ensues.
-* [] Unknown lists are returning empty with no warnings.  Should probably have warnings during compile at least.
-* [] Unknown lists are returning empty with no warnings.  Should probably have warnings during compile at least.
+* TODO
 
-Notes:
-
+### Notes
 * Need to start on the user docs soon.
 * Review testing for commands.

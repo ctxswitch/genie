@@ -76,7 +76,7 @@ func (n *Expression) String() string {
 	case TokenResource:
 		res, err := n.res.Get(n.Token.Literal, n.Name)
 		if err != nil {
-			return "resource not found"
+			return ""
 		}
 
 		out = res.Get()
