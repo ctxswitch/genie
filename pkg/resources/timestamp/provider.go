@@ -8,6 +8,8 @@ type TimestampProvider interface {
 
 type RealTime struct{}
 
+// I really want to add some sort option for jitter here as in +- random milliseconds to simulate
+// out of order requests across multiple systems.
 func (RealTime) Now() time.Time {
 	return time.Now()
 }

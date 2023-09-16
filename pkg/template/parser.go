@@ -1,6 +1,8 @@
 package template
 
 import (
+	"fmt"
+
 	"ctx.sh/genie/pkg/filter"
 )
 
@@ -38,7 +40,7 @@ func (p *Parser) Parse() (Root, error) {
 	for p.curr.Type != TokenEOF {
 		fn, ok := p.parsers[p.curr.Type]
 		if !ok {
-			return Root{}, UnknownParserError
+			return Root{}, fmt.Errorf("unexpected token: %v", p.curr.Literal)
 		}
 		node, err := fn()
 		if err != nil {
