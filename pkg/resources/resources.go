@@ -2,6 +2,7 @@ package resources
 
 import (
 	"ctx.sh/genie/pkg/resources/integer_range"
+	"ctx.sh/genie/pkg/resources/ipaddr"
 	"ctx.sh/genie/pkg/resources/list"
 	"ctx.sh/genie/pkg/resources/random_string"
 	"ctx.sh/genie/pkg/resources/timestamp"
@@ -26,6 +27,7 @@ type Resources struct {
 	Uuids         map[string]Resource
 	Timestamps    map[string]Resource
 	Maps          map[string]Resource
+	IPAddrs       map[string]Resource
 }
 
 func Parse(block Config, opts *Options) (*Resources, error) {
@@ -54,12 +56,18 @@ func Parse(block Config, opts *Options) (*Resources, error) {
 		return nil, err
 	}
 
+	ipaddrs, err := parseIPAddrs(block)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Resources{
 		IntegerRanges: integerRanges,
 		RandomStrings: randomStrings,
 		Lists:         lists,
 		Timestamps:    timestamps,
 		Uuids:         uuids,
+		IPAddrs:       ipaddrs,
 	}, nil
 }
 
@@ -113,6 +121,16 @@ func parseUuids(res Config) (map[string]Resource, error) {
 	return out, nil
 }
 
+func parseIPAddrs(res Config) (map[string]Resource, error) {
+	out := make(map[string]Resource)
+
+	for k, v := range res.IPAddrs {
+		out[k] = ipaddr.New(v)
+	}
+
+	return out, nil
+}
+
 func (r *Resources) Get(rtype string, name string) (Resource, error) {
 	switch rtype {
 	case "list":
@@ -127,6 +145,8 @@ func (r *Resources) Get(rtype string, name string) (Resource, error) {
 		return r.GetTimestamp(name)
 	case "map":
 		return r.GetMap(name)
+	case "ipaddr":
+		return r.GetIPAddr(name)
 	default:
 		return nil, InvalidResourceTypeError
 	}
@@ -183,6 +203,14 @@ func (r *Resources) GetTimestamp(name string) (Resource, error) {
 
 func (r *Resources) GetMap(name string) (Resource, error) {
 	if resource, ok := r.Maps[name]; ok {
+		return resource, nil
+	}
+
+	return nil, NotFoundError
+}
+
+func (r *Resources) GetIPAddr(name string) (Resource, error) {
+	if resource, ok := r.IPAddrs[name]; ok {
 		return resource, nil
 	}
 

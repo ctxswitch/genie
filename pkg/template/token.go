@@ -7,6 +7,7 @@ var builtins = map[string]TokenType{
 	"timestamp":     TokenResource,
 	"uuid":          TokenResource,
 	"map":           TokenResource,
+	"ipaddr":        TokenResource,
 
 	"let": TokenKeyword,
 

@@ -1,11 +1,13 @@
 resources:
   timestamps: 
-    # I really want to add some sort of jitter here as in +- random milliseconds to simulate
-    # out of order requests across multiple systems.
     now_unix:
       format: unix
     now_rfc3339:
       format: rfc3339
+    now_rfc1123:
+      format: rfc1123
+    now_common_log:
+      format: common_log
   integer_ranges:
     duration:
       min: 30
@@ -13,6 +15,9 @@ resources:
     octet:
       min: 1
       max: 255
+    size:
+      min: 300
+      max: 900
   random_strings:
     ten:
       size: 10
@@ -90,3 +95,41 @@ resources:
       - info
       - debug
       - trace
+  ipaddrs:
+    internal:
+      cidrs:
+        - 192.168.0.0/16
+    external:
+      cidrs:
+        - 13.34.66.0/27
+        - 15.230.221.0/24
+        - 13.34.103.32/27
+        - 52.94.152.9/32
+        - 142.4.161.232/29
+        - 13.34.43.192/27
+        - 15.181.232.0/21
+        - 52.93.127.163/32
+        - 142.4.160.136/29
+        - 3.2.0.0/24
+        - 15.230.137.0/24
+        - 15.230.216.8/32
+        - 52.4.0.0/14
+        - 96.0.102.0/23
+        - 142.4.160.80/29
+        - 13.34.70.224/27
+        - 50.16.0.0/15
+        - 52.95.208.0/22
+        - 15.220.196.0/22
+        - 52.93.127.169/32
+        - 52.94.244.0/22
+        - 13.34.34.192/27
+        - 15.230.254.2/31
+        - 64.252.69.0/24
+        - 13.34.17.64/27
+        - 52.95.41.0/24
+        - 142.4.160.184/29
+        - 142.4.161.64/29
+        - 3.4.0.0/24
+        - 13.34.60.128/27
+        - 52.94.152.44/32
+        - 13.34.50.224/27

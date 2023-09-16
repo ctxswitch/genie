@@ -7,7 +7,6 @@ Tomorrow, work on import template function, replace filter, and start on the IP 
 
 ### Resources
 * [] Allow integer ranges to use gaussian distribution to output numbers between the min and max
-* [] New IP resource, build out database (whether it's csv or sqlite) and use some sort of weighted random selection based on the number of ips in a subnet, then random from the min/max of the range.  User would be able to specify region(s).
 * [] The timestamp package can now move into the resource since config is handled there.
 
 ### Template

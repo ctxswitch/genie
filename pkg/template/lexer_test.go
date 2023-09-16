@@ -88,6 +88,11 @@ func TestScan(t *testing.T) {
 			NewToken(TokenPeriod, "."),
 			NewToken(TokenIdentifier, "name"),
 		}},
+		{`<<ipaddr.aws_us_east_1>> <<list.left_names>> <<list.right_names>>`, []Token{
+			NewToken(TokenResource, "ipaddr"),
+			NewToken(TokenPeriod, "."),
+			NewToken(TokenIdentifier, "aws_us_east_1"),
+		}},
 
 		// Statement
 		{`<% let greeting = "hello" %>`, []Token{

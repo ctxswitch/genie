@@ -42,13 +42,15 @@ func (t *Timestamp) Get() string {
 	case "unixnano":
 		return fmt.Sprint(now.UnixNano())
 	case "rfc3339":
-		return time.RFC3339
+		format = time.RFC3339
 	case "rfc3339nano":
-		return time.RFC3339Nano
+		format = time.RFC3339Nano
 	case "rfc1123":
-		return time.RFC1123
+		format = time.RFC1123
 	case "rfc1123z":
-		return time.RFC1123Z
+		format = time.RFC1123Z
+	case "common_log":
+		format = CommonLogFormat
 	default:
 		format = t.format
 	}
@@ -61,8 +63,4 @@ func (t *Timestamp) Get() string {
 	}
 
 	return formatted
-}
-
-func (t *Timestamp) Validate() error {
-	return nil
 }

@@ -216,7 +216,7 @@ func (l *Lexer) readByte() {
 
 func (l *Lexer) readIdentifier() string {
 	start := l.index
-	for l.index < len(l.input) && 'a' <= l.ch && l.ch <= 'z' || 'A' <= l.ch && l.ch <= 'Z' || l.ch == '_' {
+	for l.index < len(l.input) && 'a' <= l.ch && l.ch <= 'z' || 'A' <= l.ch && l.ch <= 'Z' || l.ch == '_' || '0' <= l.ch && l.ch <= '9' {
 		l.readByte()
 	}
 

@@ -2,6 +2,7 @@ package resources
 
 import (
 	"ctx.sh/genie/pkg/resources/integer_range"
+	"ctx.sh/genie/pkg/resources/ipaddr"
 	"ctx.sh/genie/pkg/resources/list"
 	"ctx.sh/genie/pkg/resources/random_string"
 	"ctx.sh/genie/pkg/resources/timestamp"
@@ -14,4 +15,5 @@ type Config struct {
 	RandomStrings map[string]random_string.Config `yaml:"random_strings"`
 	Timestamps    map[string]timestamp.Config     `yaml:"timestamps"`
 	Uuids         map[string]uuid.Config          `yaml:"uuids"`
+	IPAddrs       map[string]ipaddr.Config        `yaml:"ipaddrs"`
 }
