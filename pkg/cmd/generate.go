@@ -70,9 +70,10 @@ func (g *Generate) RunE(cmd *cobra.Command, args []string) error {
 		evts = cfg.Events.Names()
 	}
 
-	manager.Enable(evts...)
+	manager.Enable(g.sink, evts...)
 
 	g.logger.Info("starting sinks")
+	// TODO: Only start sinks that are in use.
 	cfg.Sinks.StartAll()
 
 	// Wait for context if we are not running once.
