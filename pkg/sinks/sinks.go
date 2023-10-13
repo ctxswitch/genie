@@ -5,11 +5,11 @@ import (
 	"strings"
 	"sync"
 
-	"ctx.sh/genie/pkg/resources"
-	"ctx.sh/genie/pkg/sinks/http"
-	"ctx.sh/genie/pkg/sinks/stdout"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
+	"stvz.io/genie/pkg/resources"
+	"stvz.io/genie/pkg/sinks/http"
+	"stvz.io/genie/pkg/sinks/stdout"
 )
 
 type Sink interface {

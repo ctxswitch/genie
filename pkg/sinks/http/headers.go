@@ -1,7 +1,7 @@
 package http
 
 import (
-	"ctx.sh/genie/pkg/template"
+	"stvz.io/genie/pkg/template"
 )
 
 type Headers map[string]*template.Template

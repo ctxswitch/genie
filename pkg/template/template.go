@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"ctx.sh/genie/pkg/resources"
-	"ctx.sh/genie/pkg/variables"
+	"stvz.io/genie/pkg/resources"
+	"stvz.io/genie/pkg/variables"
 )
 
 type Template struct {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"ctx.sh/genie/pkg/sinks"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
+	"stvz.io/genie/pkg/sinks"
 )
 
 type ManagerOptions struct {
