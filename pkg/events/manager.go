@@ -41,19 +41,25 @@ func NewManager(events Events, opts *ManagerOptions) *Manager {
 	}
 }
 
-func (m *Manager) Enable(names ...string) {
+// TODO: I don't like this.  Remove the sink discovery from the manager
+// and pass in the sinks that are specified on the command line, taking
+// out all of the logic for sink configuration in the config file to simplify
+// use.
+func (m *Manager) Enable(sink string, names ...string) {
 	for _, name := range names {
 		if _, ok := m.events[name]; !ok {
 			m.logger.Info("event not found", "name", name)
 			continue
 		}
 
-		// TODO: move this to the event creation, it's harder to intuit
-		// what's going on here.  I know that I didn't want to couple this
-		// but it would make more sense here.  SendChannel probably stays here
-		// so we can override.
+		var sendChan chan<- []byte
+		sendChan, err := m.sinks.Get(sink)
+		if err != nil {
+			sendChan = m.sinks.Stdout.SendChannel()
+		}
+
 		m.events[name].
-			WithSendChannel(m.sinks.Stdout.SendChannel()).
+			WithSendChannel(sendChan).
 			Enable()
 	}
 }
