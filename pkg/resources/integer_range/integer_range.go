@@ -1,4 +1,4 @@
-package integer_range
+package integer_range //nolint:revive
 
 import (
 	"fmt"
