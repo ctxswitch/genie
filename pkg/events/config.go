@@ -1,6 +1,6 @@
 package events
 
-import "ctx.sh/genie/pkg/variables"
+import "stvz.io/genie/pkg/variables"
 
 type EventConfig struct {
 	Name        string             `yaml:"name"`

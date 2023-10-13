@@ -1,14 +1,14 @@
 package resources
 
 import (
-	"ctx.sh/genie/pkg/resources/integer_range"
-	"ctx.sh/genie/pkg/resources/ipaddr"
-	"ctx.sh/genie/pkg/resources/list"
-	"ctx.sh/genie/pkg/resources/random_string"
-	"ctx.sh/genie/pkg/resources/timestamp"
-	"ctx.sh/genie/pkg/resources/uuid"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
+	"stvz.io/genie/pkg/resources/integer_range"
+	"stvz.io/genie/pkg/resources/ipaddr"
+	"stvz.io/genie/pkg/resources/list"
+	"stvz.io/genie/pkg/resources/random_string"
+	"stvz.io/genie/pkg/resources/timestamp"
+	"stvz.io/genie/pkg/resources/uuid"
 )
 
 type Resource interface {

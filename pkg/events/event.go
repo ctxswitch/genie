@@ -5,11 +5,11 @@ import (
 	"sync"
 	"time"
 
-	"ctx.sh/genie/pkg/resources"
-	"ctx.sh/genie/pkg/template"
-	"ctx.sh/genie/pkg/variables"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
+	"stvz.io/genie/pkg/resources"
+	"stvz.io/genie/pkg/template"
+	"stvz.io/genie/pkg/variables"
 )
 
 type EventOptions struct {

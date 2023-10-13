@@ -4,11 +4,11 @@ import (
 	"context"
 	"os"
 
-	"ctx.sh/genie/pkg/config"
-	"ctx.sh/genie/pkg/events"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
+	"stvz.io/genie/pkg/config"
+	"stvz.io/genie/pkg/events"
 )
 
 var usage string = `generate [NAME...] [ARG...]`

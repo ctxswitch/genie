@@ -1,9 +1,9 @@
 package events
 
 import (
-	"ctx.sh/genie/pkg/resources"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
+	"stvz.io/genie/pkg/resources"
 )
 
 type Options struct {
