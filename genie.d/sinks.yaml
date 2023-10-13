@@ -1,11 +1,11 @@
 sinks:
-  kafka:
-    kind:
-      topic: events
-      brokers:
-        - analytics-0.analytics.strataviz.svc.cluster.local:9092
-      # Add key and value serializers?
-      # Optional create topic if not exists
+  # kafka:
+  #   kind:
+  #     topic: events
+  #     brokers:
+  #       - analytics-0.analytics.strataviz.svc.cluster.local:9092
+  #     # Add key and value serializers?
+  #     # Optional create topic if not exists
   http:
     localhost:
       url: http://localhost:8080
