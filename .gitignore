@@ -21,3 +21,5 @@ vendor/
 tests/integration/nginx/conf/ssl/ca.*
 tests/integration/nginx/conf/ssl/server.*
 tests/integration/nginx/conf/ssl/localhost.*
+
+genie
