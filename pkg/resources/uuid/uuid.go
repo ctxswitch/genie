@@ -6,14 +6,17 @@ import (
 	"github.com/google/uuid"
 )
 
+// Func is a function that returns a string.
 type Func func() string
 
+// UUID is a resource that generates UUIDs.
 type UUID struct {
 	uniques int
 	fn      Func
 	cache   []string
 }
 
+// New returns a new UUID resource.
 func New(cfg Config) *UUID {
 	u := &UUID{
 		uniques: cfg.Uniques,
@@ -23,6 +26,8 @@ func New(cfg Config) *UUID {
 	return u
 }
 
+// setFn sets the UUID generation function based on the string
+// representation.
 func (u *UUID) setFn(t string) {
 	switch t {
 	case "uuid1":
@@ -32,6 +37,7 @@ func (u *UUID) setFn(t string) {
 	}
 }
 
+// Cache generates a cache of unique UUIDs.
 func (u *UUID) Cache() []string {
 	cache := make([]string, u.uniques)
 
@@ -43,14 +49,15 @@ func (u *UUID) Cache() []string {
 	return cache
 }
 
+// Get implements the Resource interface and returns a random uuid.
 func (u *UUID) Get() string {
 	if u.cache == nil && u.uniques > 0 {
 		u.cache = u.Cache()
 	}
-
 	return u.fn()
 }
 
+// uuid1 generates a UUIDv1.
 func (u *UUID) uuid1() string {
 	id, e := uuid.NewUUID()
 	if e != nil {
@@ -61,10 +68,12 @@ func (u *UUID) uuid1() string {
 	return id.String()
 }
 
+// uuid4 generates a UUIDv4.
 func (u *UUID) uuid4() string {
 	return uuid.NewString()
 }
 
+// cached returns a random UUID from the cache.
 func (u *UUID) cached() string {
 	return u.cache[rand.Intn(len(u.cache))] //nolint:gosec
 }

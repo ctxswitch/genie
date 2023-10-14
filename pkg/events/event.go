@@ -12,6 +12,7 @@ import (
 	"stvz.io/genie/pkg/variables"
 )
 
+// EventOptions are the options for an event generator.
 type EventOptions struct {
 	Logger    logr.Logger
 	Metrics   *strata.Metrics
@@ -19,6 +20,7 @@ type EventOptions struct {
 	Paths     []string
 }
 
+// Event describes an individual event generator.
 // TODO: revice config to array of events and not map
 type Event struct {
 	name       string
@@ -37,6 +39,8 @@ type Event struct {
 	stopOnce sync.Once
 }
 
+// ParseEvent parses an event config and returns an event generator.  If the
+// template does not compile then an error is returned.
 func ParseEvent(cfg EventConfig, opts *EventOptions) (*Event, error) {
 	tmpl := template.NewTemplate().WithPaths(opts.Paths)
 
@@ -70,6 +74,7 @@ func ParseEvent(cfg EventConfig, opts *EventOptions) (*Event, error) {
 	}, nil
 }
 
+// Run executes the template and sends the result to the send channel.
 func (e *Event) Run(sendChan chan<- []byte) {
 	// TODO: there's another case that the send channel could be
 	// closed, so check and if it is then close the stop channel.
@@ -82,6 +87,7 @@ func (e *Event) Run(sendChan chan<- []byte) {
 	sendChan <- []byte(p)
 }
 
+// Start starts the event generator.
 func (e *Event) Start(ctx context.Context, sendChan chan<- []byte) {
 	e.logger.Info("starting event generator", "count", e.generators)
 	for i := 0; i < e.generators; i++ {
@@ -93,6 +99,8 @@ func (e *Event) Start(ctx context.Context, sendChan chan<- []byte) {
 	}
 }
 
+// generate is the main loop for an event generator.  It will run the event
+// at the configured interval.
 func (e *Event) generate(ctx context.Context, sendChan chan<- []byte) { // nolint:unparam,revive
 	ticker := time.NewTicker(time.Duration(e.rate) * time.Second)
 	defer ticker.Stop()
@@ -108,6 +116,7 @@ func (e *Event) generate(ctx context.Context, sendChan chan<- []byte) { // nolin
 	}
 }
 
+// Stop stops the event generator.
 func (e *Event) Stop() {
 	e.stopOnce.Do(func() {
 		close(e.stopChan)

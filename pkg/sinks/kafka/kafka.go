@@ -11,6 +11,7 @@ import (
 	"github.com/twmb/franz-go/pkg/kversion"
 )
 
+// Options are the options for a Kafka sink.
 // TODO: this is just a very basic implementation to get things working
 // for another project I'm working on.  I'll need to come back and make
 // this more stable and configurable.
@@ -19,16 +20,20 @@ type Options struct {
 	Metrics *strata.Metrics
 }
 
+// Kafka is the representation of a kafka sink.
 type Kafka struct {
-	client   *kgo.Client
-	topic    string
-	seeds    []string
-	logger   logr.Logger
-	metrics  *strata.Metrics
+	client  *kgo.Client
+	topic   string
+	seeds   []string
+	logger  logr.Logger
+	metrics *strata.Metrics
+	// TODO: look at making this a buffered channel when we allow
+	// for multiple sink workers.
 	sendChan chan []byte
 	stopOnce sync.Once
 }
 
+// New returns a new Kafka sink.
 func New(cfg Config, opts *Options) *Kafka {
 	return &Kafka{
 		topic:    cfg.Topic,
@@ -39,6 +44,8 @@ func New(cfg Config, opts *Options) *Kafka {
 	}
 }
 
+// Init initializes the Kafka sink, setting up the client and checking
+// that the brokers are reachable and the topic exists.
 func (k *Kafka) Init() (err error) {
 	k.client, err = kgo.NewClient(
 		kgo.SeedBrokers(k.seeds...),
@@ -59,6 +66,7 @@ func (k *Kafka) Init() (err error) {
 	return
 }
 
+// createTopic creates the configured topic if it does not already exist.
 func (k *Kafka) createTopic() error {
 	// TODO: this should only create the topic if it's configured to do so
 	// I'll add that later.
@@ -97,6 +105,7 @@ func (k *Kafka) createTopic() error {
 	return nil
 }
 
+// Start starts the Kafka sink.
 func (k *Kafka) Start() {
 	ctx := context.Background()
 	for data := range k.sendChan {
@@ -104,6 +113,8 @@ func (k *Kafka) Start() {
 	}
 }
 
+// send sends the data asynchronously to the configured topic.
+// TODO: The sink is very basic at the moment and should be improved.
 func (k *Kafka) send(ctx context.Context, data []byte) {
 	record := &kgo.Record{
 		Topic: k.topic,
@@ -121,6 +132,7 @@ func (k *Kafka) send(ctx context.Context, data []byte) {
 	})
 }
 
+// Stop stops the Kafka sink.
 func (k *Kafka) Stop() {
 	defer k.client.Close()
 
@@ -129,6 +141,7 @@ func (k *Kafka) Stop() {
 	})
 }
 
+// SendChannel returns the channel that the event generators will send to.
 func (k *Kafka) SendChannel() chan<- []byte {
 	return k.sendChan
 }

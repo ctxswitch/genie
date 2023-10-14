@@ -11,6 +11,7 @@ import (
 	"stvz.io/genie/pkg/sinks/stdout"
 )
 
+// Sink is the interface that all sinks must implement.
 type Sink interface {
 	Init() error
 	SendChannel() chan<- []byte
@@ -18,12 +19,15 @@ type Sink interface {
 	Stop()
 }
 
+// Options are the options for a collection of configured sinks.
 type Options struct {
 	Logger  logr.Logger
 	Metrics *strata.Metrics
 }
 
+// Sinks is a collection of configured sinks.
 type Sinks struct {
+	// TODO: these can be internal.  Lowercase them.
 	Stdout Sink
 	HTTP   map[string]Sink
 	Kafka  map[string]Sink
@@ -32,6 +36,7 @@ type Sinks struct {
 	metrics *strata.Metrics
 }
 
+// New returns a new collection of sinks.
 func New(cfg Config, opts *Options) *Sinks {
 	httpSinks := parseHTTPSinks(cfg, opts)
 	kafkaSinks := parseKafkaSinks(cfg, opts)
@@ -49,6 +54,7 @@ func New(cfg Config, opts *Options) *Sinks {
 	}
 }
 
+// parseHTTPSinks parses the HTTP sinks from the config.
 func parseHTTPSinks(cfg Config, opts *Options) map[string]Sink {
 	sinks := make(map[string]Sink)
 
@@ -63,6 +69,7 @@ func parseHTTPSinks(cfg Config, opts *Options) map[string]Sink {
 	return sinks
 }
 
+// parseKafkaSinks parses the Kafka sinks from the config.
 func parseKafkaSinks(cfg Config, opts *Options) map[string]Sink {
 	sinks := make(map[string]Sink)
 
@@ -77,6 +84,8 @@ func parseKafkaSinks(cfg Config, opts *Options) map[string]Sink {
 	return sinks
 }
 
+// Get returns a sink by name.  It splits a '.' delimited string in the
+// "kind"."name" format.  If the kind is not specified then it defaults stdout.
 // TODO: no more passing sinks around, we just pass the send channel back.
 func (s *Sinks) Get(sink string) (Sink, error) {
 	var kind, name string

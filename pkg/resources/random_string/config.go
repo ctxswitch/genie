@@ -2,12 +2,14 @@ package random_string // nolint:revive
 
 import "fmt"
 
+// Config is the configuration for a random string resource.
 type Config struct {
 	Size    uint32 `yaml:"size"`
 	Chars   []rune `yaml:"chars"`
 	Uniques uint32 `yaml:"uniques"`
 }
 
+// validate validates the random string configuration.
 func (r *Config) validate() error {
 	if r.Size < 1 || r.Size > MaxRandomStringSize {
 		return fmt.Errorf("size (%d) in random_string must be greater than zero and less than or equal to %d",
@@ -25,6 +27,7 @@ func (r *Config) validate() error {
 	return nil
 }
 
+// UnmarshalYAML implements yaml.Unmarshaler for defaulting the random string config.
 func (r *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type ConfigDefaults struct {
 		Size uint32 `yaml:"size"`
