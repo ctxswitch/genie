@@ -2,11 +2,13 @@ package kafka
 
 import "fmt"
 
+// Config is the configuration for the Kafka sink.
 type Config struct {
 	Brokers []string `yaml:"brokers"`
 	Topic   string   `yaml:"topic"`
 }
 
+// validate ensures that the Kafka config is valid.
 func (c *Config) validate() error {
 	if len(c.Brokers) == 0 {
 		return fmt.Errorf("at least one broker must be provided")
@@ -19,6 +21,7 @@ func (c *Config) validate() error {
 	return nil
 }
 
+// UnmarshalYAML implements yaml.Unmarshaler for defaulting the Kafka config.
 func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type ConfigDefaulted Config
 

@@ -13,18 +13,23 @@ import (
 	"stvz.io/genie/pkg/sinks"
 )
 
+// LoadOptions are the options for loading the config.
 type LoadOptions struct {
 	Logger  logr.Logger
 	Metrics *strata.Metrics
 	Paths   []string
 }
 
+// Config is the config for the genie application.
 type Config struct {
 	Events    events.Events
 	Resources *resources.Resources
 	Sinks     *sinks.Sinks
 }
 
+// Load loads the config files from the provided paths.  It can take multiple paths
+// and will load all files with a yaml extension from each path.  It returns an error
+// if any of the files fail to load or parse.
 // TODO: move sinks and events?  Events won't actually need anything special, just
 // the config parsing.  Sinks will be set up like resources.
 func Load(opts *LoadOptions) (*Config, error) {

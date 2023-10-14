@@ -2,11 +2,13 @@ package http
 
 import "fmt"
 
+// HeaderConfig is a configuration for a single HTTP header.
 type HeaderConfig struct {
 	Name  string `yaml:"name"`
 	Value string `yaml:"value"`
 }
 
+// validate ensures that the header config is valid.
 func (h *HeaderConfig) validate() error {
 	if h.Name == "" || h.Value == "" {
 		return fmt.Errorf("name and value must be provided")
@@ -15,6 +17,7 @@ func (h *HeaderConfig) validate() error {
 	return nil
 }
 
+// UnmarshalYAML implements yaml.Unmarshaler for defaulting the header config.
 func (h *HeaderConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type HeaderConfigDefaulted HeaderConfig
 	var defaults = HeaderConfigDefaulted{}
@@ -33,12 +36,16 @@ func (h *HeaderConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
+// Config is the configuration for an HTTP sink.
 type Config struct {
 	URL     string `yaml:"url"`
 	Headers []HeaderConfig
 	Method  string `yaml:"method"`
 }
 
+// TODO: validation
+
+// UnmarshalYAML implements yaml.Unmarshaler for defaulting the HTTP config.
 func (h *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type ConfigDefaulted Config
 	// TODO: make const defaults

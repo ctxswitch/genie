@@ -13,11 +13,13 @@ import (
 	"stvz.io/genie/pkg/variables"
 )
 
+// Options are the options for an HTTP sink.
 type Options struct {
 	Logger  logr.Logger
 	Metrics *strata.Metrics
 }
 
+// HTTP is an HTTP sink.
 type HTTP struct {
 	url     string
 	headers Headers
@@ -30,11 +32,13 @@ type HTTP struct {
 
 	resources *resources.Resources
 	variables *variables.Variables
-
+	// TODO: look at making this a buffered channel when we allow
+	// for multiple sink workers.
 	sendChan chan []byte
 	stopOnce sync.Once
 }
 
+// New returns a new HTTP sink.
 func New(cfg Config, opts *Options) *HTTP {
 	return &HTTP{
 		url:      cfg.URL,
@@ -46,10 +50,9 @@ func New(cfg Config, opts *Options) *HTTP {
 	}
 }
 
+// Init initializes the HTTP sink, setting up the client and send channel
+// that events will be sent to.
 func (h *HTTP) Init() error {
-	// TODO: evaluate use of buffered channels after we have send workers.
-	h.sendChan = make(chan []byte)
-
 	h.client = http.Client{
 		Timeout: h.timeout,
 		Transport: &http.Transport{
@@ -64,10 +67,13 @@ func (h *HTTP) Init() error {
 	return nil
 }
 
+// Start starts the HTTP sink.
 func (h *HTTP) Start() {
 	h.start()
 }
 
+// start is the main loop for the sink that listens for events on the send
+// channel.
 func (h *HTTP) start() {
 	for data := range h.sendChan {
 		if err := h.send(data); err != nil {
@@ -76,6 +82,7 @@ func (h *HTTP) start() {
 	}
 }
 
+// send sends the data to the configured URL.
 // TODO: this is still going to be blocking. I need to make this async.
 func (h *HTTP) send(data []byte) error {
 	req, err := http.NewRequest(h.method, h.url, bytes.NewBuffer(data))
@@ -103,12 +110,15 @@ func (h *HTTP) send(data []byte) error {
 	return nil
 }
 
+// Stop stops the HTTP sink.
 func (h *HTTP) Stop() {
 	h.stopOnce.Do(func() {
 		close(h.sendChan)
 	})
 }
 
+// Name returns the channel that the event generators will send
+// events to.
 func (h *HTTP) SendChannel() chan<- []byte {
 	return h.sendChan
 }

@@ -2,11 +2,13 @@ package ipaddr
 
 import "net"
 
+// Config is the configuration for the ipaddr resource.
 type Config struct {
 	Cidrs   []string `yaml:"cidrs"`
 	Uniques uint32   `yaml:"uniques"`
 }
 
+// validate ensures the configuration is valid.
 func (i *Config) validate() error {
 	for _, cidr := range i.Cidrs {
 		_, _, err := net.ParseCIDR(cidr)
@@ -18,6 +20,7 @@ func (i *Config) validate() error {
 	return nil
 }
 
+// UnmarshalYAML implements yaml.Unmarshaler for defaulting the ipaddr config.
 func (i *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type ConfigDefaulted Config
 	var defaults = ConfigDefaulted{

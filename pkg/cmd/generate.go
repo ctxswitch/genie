@@ -17,6 +17,7 @@ var longDesc = `Start the generator for one or many events. By default all confi
 event generators will be run on startup. Individual events can be specified by using the event
 name. Generate specific arguments can be added as after the event name.`
 
+// Generate is the command that starts the event generators.
 type Generate struct {
 	logger      logr.Logger
 	metrics     *strata.Metrics
@@ -27,6 +28,7 @@ type Generate struct {
 	sink        string
 }
 
+// NewGenerate returns a new Generate command.
 func NewGenerate(opts *GlobalOpts) *Generate {
 	return &Generate{
 		logger:  opts.Logger,
@@ -35,6 +37,8 @@ func NewGenerate(opts *GlobalOpts) *Generate {
 	}
 }
 
+// RunE is the main entry point for the generate command which
+// returns an error.
 func (g *Generate) RunE(cmd *cobra.Command, args []string) error { // nolint:revive
 	ctx, cancel := context.WithCancel(g.ctx)
 	defer cancel()
@@ -97,6 +101,7 @@ shutdown:
 	return nil
 }
 
+// Command returns the cobra command for the generate command.
 func (g *Generate) Command() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   usage,

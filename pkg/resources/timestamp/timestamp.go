@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// Timestamp is a resource that returns the current or set time in a specified'
+// format.
 type Timestamp struct {
 	// format is a textual representation of the time value formatted
 	// according to the layout defined by the argument.  It follows
@@ -16,6 +18,7 @@ type Timestamp struct {
 	provider  Provider
 }
 
+// New returns a new timestamp resource.
 func New(cfg Config) *Timestamp {
 	return &Timestamp{
 		format:    cfg.Format,
@@ -24,11 +27,15 @@ func New(cfg Config) *Timestamp {
 	}
 }
 
+// WithProvider sets the time provider for the timestamp resource. This is
+// currently only used in testing.
 func (t *Timestamp) WithProvider(provider Provider) *Timestamp {
 	t.provider = provider
 	return t
 }
 
+// Get implements the resource interface and returns the current time in the
+// specified format.
 func (t *Timestamp) Get() string {
 	if t.timestamp != "" {
 		return t.timestamp

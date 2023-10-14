@@ -11,6 +11,7 @@ import (
 	"stvz.io/genie/pkg/build"
 )
 
+// GlobalOpts are the global options for all commands
 type GlobalOpts struct {
 	Logger      logr.Logger
 	Metrics     *strata.Metrics
@@ -18,6 +19,7 @@ type GlobalOpts struct {
 	CancelFunc  context.CancelFunc
 }
 
+// Root is the root command for the genie CLI
 type Root struct {
 	logger  logr.Logger
 	metrics *strata.Metrics
@@ -25,6 +27,7 @@ type Root struct {
 	cancel  context.CancelFunc
 }
 
+// NewRoot returns a new root command
 func NewRoot(opts *GlobalOpts) *Root {
 	return &Root{
 		logger:  opts.Logger,
@@ -34,6 +37,7 @@ func NewRoot(opts *GlobalOpts) *Root {
 	}
 }
 
+// Execute runs the root command
 func (r *Root) Execute() {
 	if err := r.Command().Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -41,6 +45,7 @@ func (r *Root) Execute() {
 	}
 }
 
+// Command returns the root command
 func (r *Root) Command() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "genie",

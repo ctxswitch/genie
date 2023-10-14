@@ -9,10 +9,12 @@ import (
 	"stvz.io/genie/pkg/resources/uuid"
 )
 
+// Resource defines the interface all resources must adhear to.
 type Resource interface {
 	Get() string
 }
 
+// Resources contains a map of all configured resources.
 type Resources struct {
 	Lists         map[string]Resource
 	IntegerRanges map[string]Resource
@@ -23,6 +25,7 @@ type Resources struct {
 	IPAddrs       map[string]Resource
 }
 
+// New returns a new collection of resources.
 func New(block Config) *Resources {
 	return &Resources{
 		IntegerRanges: parseIntegerRanges(block),
@@ -34,6 +37,7 @@ func New(block Config) *Resources {
 	}
 }
 
+// parseIntegerRanges parses a map of integer ranges into a map of resources.
 func parseIntegerRanges(res Config) map[string]Resource {
 	out := make(map[string]Resource)
 
@@ -44,6 +48,7 @@ func parseIntegerRanges(res Config) map[string]Resource {
 	return out
 }
 
+// parseRandomStrings parses a map of random strings into a map of resources.
 func parseRandomStrings(res Config) map[string]Resource {
 	out := make(map[string]Resource)
 
@@ -54,6 +59,7 @@ func parseRandomStrings(res Config) map[string]Resource {
 	return out
 }
 
+// parseLists parses a map of lists into a map of resources.
 func parseLists(res Config) map[string]Resource {
 	out := make(map[string]Resource)
 
@@ -64,6 +70,7 @@ func parseLists(res Config) map[string]Resource {
 	return out
 }
 
+// parseTimestamps parses a map of timestamps into a map of resources.
 func parseTimestamps(res Config) map[string]Resource {
 	out := make(map[string]Resource)
 
@@ -74,6 +81,7 @@ func parseTimestamps(res Config) map[string]Resource {
 	return out
 }
 
+// parseUUIDs parses a map of UUIDs into a map of resources.
 func parseUUIDs(res Config) map[string]Resource {
 	out := make(map[string]Resource)
 
@@ -84,6 +92,7 @@ func parseUUIDs(res Config) map[string]Resource {
 	return out
 }
 
+// parseIPAddrs parses a map of IP addresses into a map of resources.
 func parseIPAddrs(res Config) map[string]Resource {
 	out := make(map[string]Resource)
 
@@ -94,6 +103,10 @@ func parseIPAddrs(res Config) map[string]Resource {
 	return out
 }
 
+// Get returns a resource by type and name.
+// TODO: we could probably just pass in the full resource name
+// complete with the delimited name and type.  Something similar
+// was done for the sinks.
 func (r *Resources) Get(rtype string, name string) (Resource, error) {
 	switch rtype {
 	case "list":
@@ -115,15 +128,7 @@ func (r *Resources) Get(rtype string, name string) (Resource, error) {
 	}
 }
 
-func (r *Resources) MustGet(rtype string, name string) Resource {
-	res, err := r.Get(rtype, name)
-	if err != nil {
-		panic(err)
-	}
-
-	return res
-}
-
+// GetList returns a list resource by name.
 func (r *Resources) GetList(name string) (Resource, error) {
 	if resource, ok := r.Lists[name]; ok {
 		return resource, nil
@@ -132,6 +137,7 @@ func (r *Resources) GetList(name string) (Resource, error) {
 	return nil, NotFoundError
 }
 
+// GetIntegerRange returns an integer range resource by name.
 func (r *Resources) GetIntegerRange(name string) (Resource, error) {
 	if resource, ok := r.IntegerRanges[name]; ok {
 		return resource, nil
@@ -140,6 +146,7 @@ func (r *Resources) GetIntegerRange(name string) (Resource, error) {
 	return nil, NotFoundError
 }
 
+// GetRandomString returns a random string resource by name.
 func (r *Resources) GetRandomString(name string) (Resource, error) {
 	if resource, ok := r.RandomStrings[name]; ok {
 		return resource, nil
@@ -148,6 +155,7 @@ func (r *Resources) GetRandomString(name string) (Resource, error) {
 	return nil, NotFoundError
 }
 
+// GetUUID returns a UUID resource by name.
 func (r *Resources) GetUUID(name string) (Resource, error) {
 	if resource, ok := r.UUIDs[name]; ok {
 		return resource, nil
@@ -156,6 +164,7 @@ func (r *Resources) GetUUID(name string) (Resource, error) {
 	return nil, NotFoundError
 }
 
+// GetTimestamp returns a timestamp resource by name.
 func (r *Resources) GetTimestamp(name string) (Resource, error) {
 	if resource, ok := r.Timestamps[name]; ok {
 		return resource, nil
@@ -164,6 +173,7 @@ func (r *Resources) GetTimestamp(name string) (Resource, error) {
 	return nil, NotFoundError
 }
 
+// GetMap returns a map resource by name.
 func (r *Resources) GetMap(name string) (Resource, error) {
 	if resource, ok := r.Maps[name]; ok {
 		return resource, nil
@@ -172,6 +182,7 @@ func (r *Resources) GetMap(name string) (Resource, error) {
 	return nil, NotFoundError
 }
 
+// GetIPAddr returns an IP address resource by name.
 func (r *Resources) GetIPAddr(name string) (Resource, error) {
 	if resource, ok := r.IPAddrs[name]; ok {
 		return resource, nil

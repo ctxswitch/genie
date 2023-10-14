@@ -2,6 +2,7 @@ package events
 
 import "stvz.io/genie/pkg/variables"
 
+// EventConfig is the configuration for a single event.
 type EventConfig struct {
 	Name        string             `yaml:"name"`
 	Generators  int                `yaml:"generators"`
@@ -11,6 +12,7 @@ type EventConfig struct {
 	Raw         string             `yaml:"raw"`
 }
 
+// UnmarshalYAML implements yaml.Unmarshaler for defaulting the event config.
 func (e *EventConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type EventConfigDefaults struct {
 		Name        string             `yaml:"name"`
@@ -37,4 +39,5 @@ func (e *EventConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
+// Config is a collection of event configs.
 type Config []EventConfig
