@@ -14,7 +14,7 @@ import (
 // TODO: this is just a very basic implementation to get things working
 // for another project I'm working on.  I'll need to come back and make
 // this more stable and configurable.
-type KafkaOpts struct {
+type Options struct {
 	Logger  logr.Logger
 	Metrics *strata.Metrics
 }
@@ -29,7 +29,7 @@ type Kafka struct {
 	stopOnce sync.Once
 }
 
-func New(cfg Config, opts *KafkaOpts) *Kafka {
+func New(cfg Config, opts *Options) *Kafka {
 	return &Kafka{
 		topic:    cfg.Topic,
 		seeds:    cfg.Brokers,

@@ -21,7 +21,7 @@ func TestScopedVariables(t *testing.T) {
 	assert.Equal(t, "Dwight Schrute", scoped.vars[0].vars["name"])
 	assert.Equal(t, "Dwight Schrute", scoped.vars[1].vars["name"])
 
-	scoped.Set("name", "Jim Halpert")
+	_ = scoped.Set("name", "Jim Halpert")
 	assert.Equal(t, "Dwight Schrute", scoped.vars[0].vars["name"])
 	assert.Equal(t, "Jim Halpert", scoped.vars[1].vars["name"])
 

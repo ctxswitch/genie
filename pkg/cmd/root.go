@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	version string = "v0.1.0"
+	version = "v0.1.0"
 )
 
 type GlobalOpts struct {

@@ -275,7 +275,7 @@ func (l *Lexer) peek() byte {
 	return l.input[l.next]
 }
 
-func (l *Lexer) shift(n int) {
+func (l *Lexer) shift(n int) { // nolint:unparam
 	for i := 0; i < n; i++ {
 		l.readByte()
 	}

@@ -1,8 +1,6 @@
 package resources
 
 import (
-	"ctx.sh/strata"
-	"github.com/go-logr/logr"
 	"stvz.io/genie/pkg/resources/integer_range"
 	"stvz.io/genie/pkg/resources/ipaddr"
 	"stvz.io/genie/pkg/resources/list"
@@ -15,120 +13,85 @@ type Resource interface {
 	Get() string
 }
 
-type Options struct {
-	Logger  logr.Logger
-	Metrics *strata.Metrics
-}
-
 type Resources struct {
 	Lists         map[string]Resource
 	IntegerRanges map[string]Resource
 	RandomStrings map[string]Resource
-	Uuids         map[string]Resource
+	UUIDs         map[string]Resource
 	Timestamps    map[string]Resource
 	Maps          map[string]Resource
 	IPAddrs       map[string]Resource
 }
 
-func Parse(block Config, opts *Options) (*Resources, error) {
-	integerRanges, err := parseIntegerRanges(block)
-	if err != nil {
-		return nil, err
-	}
-
-	lists, err := parseLists(block)
-	if err != nil {
-		return nil, err
-	}
-
-	randomStrings, err := parseRandomStrings(block)
-	if err != nil {
-		return nil, err
-	}
-
-	timestamps, err := parseTimestamps(block)
-	if err != nil {
-		return nil, err
-	}
-
-	uuids, err := parseUuids(block)
-	if err != nil {
-		return nil, err
-	}
-
-	ipaddrs, err := parseIPAddrs(block)
-	if err != nil {
-		return nil, err
-	}
-
+func New(block Config) *Resources {
 	return &Resources{
-		IntegerRanges: integerRanges,
-		RandomStrings: randomStrings,
-		Lists:         lists,
-		Timestamps:    timestamps,
-		Uuids:         uuids,
-		IPAddrs:       ipaddrs,
-	}, nil
+		IntegerRanges: parseIntegerRanges(block),
+		RandomStrings: parseRandomStrings(block),
+		Lists:         parseLists(block),
+		Timestamps:    parseTimestamps(block),
+		UUIDs:         parseUUIDs(block),
+		IPAddrs:       parseIPAddrs(block),
+	}
 }
 
-func parseIntegerRanges(res Config) (map[string]Resource, error) {
+func parseIntegerRanges(res Config) map[string]Resource {
 	out := make(map[string]Resource)
 
 	for k, v := range res.IntegerRanges {
 		out[k] = integer_range.New(v)
 	}
 
-	return out, nil
+	return out
 }
 
-func parseRandomStrings(res Config) (map[string]Resource, error) {
+func parseRandomStrings(res Config) map[string]Resource {
 	out := make(map[string]Resource)
 
 	for k, v := range res.RandomStrings {
 		out[k] = random_string.New(v)
 	}
 
-	return out, nil
+	return out
 }
 
-func parseLists(res Config) (map[string]Resource, error) {
+func parseLists(res Config) map[string]Resource {
 	out := make(map[string]Resource)
 
 	for k, v := range res.Lists {
 		out[k] = list.New(v)
 	}
 
-	return out, nil
+	return out
 }
 
-func parseTimestamps(res Config) (map[string]Resource, error) {
+func parseTimestamps(res Config) map[string]Resource {
 	out := make(map[string]Resource)
 
 	for k, v := range res.Timestamps {
 		out[k] = timestamp.New(v)
 	}
 
-	return out, nil
+	return out
 }
 
-func parseUuids(res Config) (map[string]Resource, error) {
+func parseUUIDs(res Config) map[string]Resource {
 	out := make(map[string]Resource)
 
-	for k, v := range res.Uuids {
+	for k, v := range res.UUIDs {
 		out[k] = uuid.New(v)
 	}
 
-	return out, nil
+	return out
 }
 
-func parseIPAddrs(res Config) (map[string]Resource, error) {
+func parseIPAddrs(res Config) map[string]Resource {
 	out := make(map[string]Resource)
 
 	for k, v := range res.IPAddrs {
 		out[k] = ipaddr.New(v)
 	}
 
-	return out, nil
+	return out
 }
 
 func (r *Resources) Get(rtype string, name string) (Resource, error) {
@@ -140,7 +103,7 @@ func (r *Resources) Get(rtype string, name string) (Resource, error) {
 	case "random_string":
 		return r.GetRandomString(name)
 	case "uuid":
-		return r.GetUuid(name)
+		return r.GetUUID(name)
 	case "timestamp":
 		return r.GetTimestamp(name)
 	case "map":
@@ -185,8 +148,8 @@ func (r *Resources) GetRandomString(name string) (Resource, error) {
 	return nil, NotFoundError
 }
 
-func (r *Resources) GetUuid(name string) (Resource, error) {
-	if resource, ok := r.Uuids[name]; ok {
+func (r *Resources) GetUUID(name string) (Resource, error) {
+	if resource, ok := r.UUIDs[name]; ok {
 		return resource, nil
 	}
 

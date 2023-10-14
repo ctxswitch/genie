@@ -16,7 +16,7 @@ func (s *LexerMode) size() int {
 	return len(*s)
 }
 
-func (s *LexerMode) Mode() mode {
+func (s *LexerMode) Mode() mode { // nolint:revive
 	size := s.size()
 	if size == 0 {
 		panic("internal error: empty state")

@@ -31,10 +31,9 @@ func (s *Stdout) start() {
 	}
 }
 
-func (s *Stdout) send(data []byte) error {
+func (s *Stdout) send(data []byte) {
 	_, _ = s.fd.Write(data)
 	_, _ = s.fd.Write([]byte("\n"))
-	return nil
 }
 
 func (s *Stdout) Stop() {

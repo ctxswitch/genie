@@ -93,7 +93,7 @@ func (e *Event) Start(ctx context.Context, sendChan chan<- []byte) {
 	}
 }
 
-func (e *Event) generate(ctx context.Context, sendChan chan<- []byte) {
+func (e *Event) generate(ctx context.Context, sendChan chan<- []byte) { // nolint:unparam,revive
 	ticker := time.NewTicker(time.Duration(e.rate) * time.Second)
 	defer ticker.Stop()
 

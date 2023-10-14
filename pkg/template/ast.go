@@ -37,7 +37,7 @@ type StatementNode interface {
 type ExpressionNode interface {
 	Node
 	ExpressionNode()
-	WithFilter(filter.FilterFunc) ExpressionNode
+	WithFilter(filter.Func) ExpressionNode
 	WithVariables(*variables.ScopedVariables) ExpressionNode
 	WithResources(*resources.Resources) ExpressionNode
 }
@@ -59,7 +59,7 @@ func (n *Text) String() string { return n.Token.Literal }
 type Expression struct {
 	Token  Token
 	Name   string
-	Filter filter.FilterFunc
+	Filter filter.Func
 
 	vars *variables.ScopedVariables
 	res  *resources.Resources
@@ -91,7 +91,7 @@ func (n *Expression) String() string {
 	return out
 }
 
-func (n *Expression) WithFilter(fn filter.FilterFunc) ExpressionNode {
+func (n *Expression) WithFilter(fn filter.Func) ExpressionNode {
 	n.Filter = fn
 	return n
 }

@@ -6,7 +6,7 @@ import (
 
 type Headers map[string]*template.Template
 
-func newHeaders(cfg []HttpHeaderConfig) Headers {
+func newHeaders(cfg []HeaderConfig) Headers {
 	headers := make(Headers)
 	for _, h := range cfg {
 		tmpl := template.NewTemplate()

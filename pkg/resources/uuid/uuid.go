@@ -6,16 +6,16 @@ import (
 	"github.com/google/uuid"
 )
 
-type UuidFunc func() string
+type Func func() string
 
-type Uuid struct {
+type UUID struct {
 	uniques int
-	fn      UuidFunc
+	fn      Func
 	cache   []string
 }
 
-func New(cfg Config) *Uuid {
-	u := &Uuid{
+func New(cfg Config) *UUID {
+	u := &UUID{
 		uniques: cfg.Uniques,
 	}
 
@@ -23,7 +23,7 @@ func New(cfg Config) *Uuid {
 	return u
 }
 
-func (u *Uuid) setFn(t string) {
+func (u *UUID) setFn(t string) {
 	switch t {
 	case "uuid1":
 		u.fn = u.uuid1
@@ -32,7 +32,7 @@ func (u *Uuid) setFn(t string) {
 	}
 }
 
-func (u *Uuid) Cache() []string {
+func (u *UUID) Cache() []string {
 	cache := make([]string, u.uniques)
 
 	for i := 0; i < u.uniques; i++ {
@@ -43,7 +43,7 @@ func (u *Uuid) Cache() []string {
 	return cache
 }
 
-func (u *Uuid) Get() string {
+func (u *UUID) Get() string {
 	if u.cache == nil && u.uniques > 0 {
 		u.cache = u.Cache()
 	}
@@ -51,7 +51,7 @@ func (u *Uuid) Get() string {
 	return u.fn()
 }
 
-func (u *Uuid) uuid1() string {
+func (u *UUID) uuid1() string {
 	id, e := uuid.NewUUID()
 	if e != nil {
 		// TODO: rethink this
@@ -61,10 +61,10 @@ func (u *Uuid) uuid1() string {
 	return id.String()
 }
 
-func (u *Uuid) uuid4() string {
+func (u *UUID) uuid4() string {
 	return uuid.NewString()
 }
 
-func (u *Uuid) cached() string {
+func (u *UUID) cached() string {
 	return u.cache[rand.Intn(len(u.cache))] //nolint:gosec
 }

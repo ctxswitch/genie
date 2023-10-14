@@ -20,8 +20,8 @@ func (u *Config) validate() error {
 func (u *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type ConfigDefaulted Config
 	var defaults = ConfigDefaulted{
-		Type:    DefaultUuidType,
-		Uniques: DefaultUuidUniques,
+		Type:    DefaultUUIDType,
+		Uniques: DefaultUUIDUniques,
 	}
 
 	out := defaults
