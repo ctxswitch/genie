@@ -30,6 +30,12 @@ test:
 build: verify
 	go build -trimpath --ldflags $(LDFLAGS) -o genie
 
+# Temporary.  Will set up automated builds later.
+publish:
+	@docker build . -t strataviz/genie:0.1.0
+	@docker tag strataviz/genie:0.1.0 strataviz/genie:latest
+	@docker push strataviz/genie --all-tags
+
 testcerts:
 	@(cd tests/integration/nginx && ./gen-certs.sh)
 
