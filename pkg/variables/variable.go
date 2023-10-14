@@ -2,7 +2,7 @@ package variables
 
 type Variables struct {
 	// how to handle this?  I'll just use a map for now, but I think I want something more
-	// with type refereces and such.
+	// with type references and such.
 	vars map[string]string
 }
 

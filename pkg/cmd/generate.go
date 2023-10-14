@@ -11,9 +11,9 @@ import (
 	"stvz.io/genie/pkg/events"
 )
 
-var usage string = `generate [NAME...] [ARG...]`
-var shortDesc string = `Start the generator for one or many events.`
-var longDesc string = `Start the generator for one or many events. By default all configured
+var usage = `generate [NAME...] [ARG...]`
+var shortDesc = `Start the generator for one or many events.`
+var longDesc = `Start the generator for one or many events. By default all configured
 event generators will be run on startup. Individual events can be specified by using the event
 name. Generate specific arguments can be added as after the event name.`
 
@@ -54,7 +54,6 @@ func (g *Generate) RunE(cmd *cobra.Command, args []string) error {
 		os.Exit(1)
 	}
 
-	g.logger.Info("starting sink", "args", args, "sink", g.sink)
 	// TODO: Maybe we can add a start to the sinks struct that will take a
 	// name and encasulate the logic below.
 	sink, err := cfg.Sinks.Get(g.sink)
@@ -70,15 +69,12 @@ func (g *Generate) RunE(cmd *cobra.Command, args []string) error {
 
 	go sink.Start()
 
-	g.logger.Info("starting event generators", "args", args, "sink", g.sink, "once", g.once)
 	manager := events.NewManager()
-
 	// TODO: pull me out into another function.  Right now we start all
 	// events that are configured, but we should also allow the user to
 	// specify which events to start on the command line.  That will
 	// happen later and should be pretty simple.
-	for name, event := range cfg.Events {
-		g.logger.Info("starting event generator", "name", name)
+	for _, event := range cfg.Events {
 		if g.once {
 			event.Run(sink.SendChannel())
 		} else {

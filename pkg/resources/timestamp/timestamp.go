@@ -13,7 +13,7 @@ type Timestamp struct {
 	// rfc3999nano, unix, and unixnano.
 	format    string
 	timestamp string
-	provider  TimestampProvider
+	provider  Provider
 }
 
 func New(cfg Config) *Timestamp {
@@ -24,7 +24,7 @@ func New(cfg Config) *Timestamp {
 	}
 }
 
-func (t *Timestamp) WithProvider(provider TimestampProvider) *Timestamp {
+func (t *Timestamp) WithProvider(provider Provider) *Timestamp {
 	t.provider = provider
 	return t
 }

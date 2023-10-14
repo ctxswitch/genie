@@ -1,6 +1,6 @@
 package http
 
 const (
-	DefaultHttpUrl = "http://localhost"
+	DefaultHTTPUrl = "http://localhost"
 	DefaultMethod  = "POST"
 )

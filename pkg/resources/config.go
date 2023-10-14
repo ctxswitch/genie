@@ -14,6 +14,6 @@ type Config struct {
 	Lists         map[string]list.Config          `yaml:"lists"`
 	RandomStrings map[string]random_string.Config `yaml:"random_strings"`
 	Timestamps    map[string]timestamp.Config     `yaml:"timestamps"`
-	Uuids         map[string]uuid.Config          `yaml:"uuids"`
+	UUIDs         map[string]uuid.Config          `yaml:"uuids"`
 	IPAddrs       map[string]ipaddr.Config        `yaml:"ipaddrs"`
 }

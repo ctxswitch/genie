@@ -2,12 +2,12 @@ package http
 
 import "fmt"
 
-type HttpHeaderConfig struct {
+type HeaderConfig struct {
 	Name  string `yaml:"name"`
 	Value string `yaml:"value"`
 }
 
-func (h *HttpHeaderConfig) validate() error {
+func (h *HeaderConfig) validate() error {
 	if h.Name == "" || h.Value == "" {
 		return fmt.Errorf("name and value must be provided")
 	}
@@ -15,16 +15,16 @@ func (h *HttpHeaderConfig) validate() error {
 	return nil
 }
 
-func (h *HttpHeaderConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type HttpHeaderConfigDefaulted HttpHeaderConfig
-	var defaults = HttpHeaderConfigDefaulted{}
+func (h *HeaderConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type HeaderConfigDefaulted HeaderConfig
+	var defaults = HeaderConfigDefaulted{}
 
 	out := defaults
 	if err := unmarshal(&out); err != nil {
 		return err
 	}
 
-	header := HttpHeaderConfig(out)
+	header := HeaderConfig(out)
 	if err := header.validate(); err != nil {
 		return err
 	}
@@ -34,8 +34,8 @@ func (h *HttpHeaderConfig) UnmarshalYAML(unmarshal func(interface{}) error) erro
 }
 
 type Config struct {
-	Url     string `yaml:"url"`
-	Headers []HttpHeaderConfig
+	URL     string `yaml:"url"`
+	Headers []HeaderConfig
 	Method  string `yaml:"method"`
 }
 
@@ -43,7 +43,7 @@ func (h *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type ConfigDefaulted Config
 	// TODO: make const defaults
 	var defaults = ConfigDefaulted{
-		Url:    DefaultHttpUrl,
+		URL:    DefaultHTTPUrl,
 		Method: DefaultMethod,
 	}
 

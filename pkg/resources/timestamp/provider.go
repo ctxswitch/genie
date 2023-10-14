@@ -2,7 +2,7 @@ package timestamp
 
 import "time"
 
-type TimestampProvider interface {
+type Provider interface {
 	Now() time.Time
 }
 
@@ -15,7 +15,7 @@ func (RealTime) Now() time.Time {
 }
 
 type TestTime struct {
-	TimestampProvider,
+	Provider,
 	override string
 }
 

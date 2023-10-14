@@ -60,11 +60,11 @@ func Load(opts *LoadOptions) (*Config, error) {
 		}
 	}
 
-	res, err := resources.Parse(config.Resources, &resources.Options{})
-	if err != nil {
-		opts.Logger.Error(err, "unable to parse resources")
-		return nil, err
-	}
+	res := resources.New(config.Resources)
+	snks := sinks.New(config.Sinks, &sinks.Options{
+		Logger:  opts.Logger,
+		Metrics: opts.Metrics,
+	})
 
 	evts, err := events.Parse(config.Events, &events.Options{
 		Logger:    opts.Logger,
@@ -74,15 +74,6 @@ func Load(opts *LoadOptions) (*Config, error) {
 	})
 	if err != nil {
 		opts.Logger.Error(err, "unable to parse events")
-		return nil, err
-	}
-
-	snks, err := sinks.Parse(config.Sinks, res, &sinks.Options{
-		Logger:  opts.Logger,
-		Metrics: opts.Metrics,
-	})
-	if err != nil {
-		opts.Logger.Error(err, "unable to parse sinks")
 		return nil, err
 	}
 

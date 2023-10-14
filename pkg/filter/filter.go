@@ -2,14 +2,14 @@ package filter
 
 import "errors"
 
-type FilterFunc func(any) string
+type Func func(any) string
 
-var FilterMap = map[string]FilterFunc{
+var FilterMap = map[string]Func{
 	"capitalize":  Capitalize,
 	"passthrough": Passthrough,
 }
 
-func Lookup(name string) (FilterFunc, error) {
+func Lookup(name string) (Func, error) {
 	fn, ok := FilterMap[name]
 	if !ok {
 		return nil, errors.New("Unknown filter")

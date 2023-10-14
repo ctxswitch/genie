@@ -1,4 +1,4 @@
-package random_string
+package random_string // nolint:revive
 
 const (
 	DefaultRandomStringSize    uint32 = 10

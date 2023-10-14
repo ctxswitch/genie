@@ -13,7 +13,7 @@ import (
 	"stvz.io/genie/pkg/variables"
 )
 
-type HTTPOptions struct {
+type Options struct {
 	Logger  logr.Logger
 	Metrics *strata.Metrics
 }
@@ -35,9 +35,9 @@ type HTTP struct {
 	stopOnce sync.Once
 }
 
-func New(cfg Config, opts *HTTPOptions) *HTTP {
+func New(cfg Config, opts *Options) *HTTP {
 	return &HTTP{
-		url:      cfg.Url,
+		url:      cfg.URL,
 		method:   cfg.Method,
 		headers:  newHeaders(cfg.Headers),
 		sendChan: make(chan []byte),
@@ -70,7 +70,9 @@ func (h *HTTP) Start() {
 
 func (h *HTTP) start() {
 	for data := range h.sendChan {
-		h.send(data)
+		if err := h.send(data); err != nil {
+			h.logger.Error(err, "failed to send data")
+		}
 	}
 }
 

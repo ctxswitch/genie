@@ -6,7 +6,6 @@ import (
 
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
-	"stvz.io/genie/pkg/resources"
 	"stvz.io/genie/pkg/sinks/http"
 	"stvz.io/genie/pkg/sinks/kafka"
 	"stvz.io/genie/pkg/sinks/stdout"
@@ -33,19 +32,12 @@ type Sinks struct {
 	metrics *strata.Metrics
 }
 
-func Parse(cfg Config, res *resources.Resources, opts *Options) (*Sinks, error) {
-	httpSinks, err := parseHttpSinks(cfg, res, opts)
-	if err != nil {
-		return nil, err
-	}
-
-	kafkaSinks, err := parseKafkaSinks(cfg, res, opts)
-	if err != nil {
-		return nil, err
-	}
+func New(cfg Config, opts *Options) *Sinks {
+	httpSinks := parseHTTPSinks(cfg, opts)
+	kafkaSinks := parseKafkaSinks(cfg, opts)
 
 	stdoutSink := stdout.New()
-	stdoutSink.Init()
+	_ = stdoutSink.Init()
 
 	return &Sinks{
 		Stdout: stdoutSink,
@@ -54,35 +46,35 @@ func Parse(cfg Config, res *resources.Resources, opts *Options) (*Sinks, error) 
 
 		logger:  opts.Logger.WithName("sinks"),
 		metrics: opts.Metrics.WithPrefix("sinks"),
-	}, nil
+	}
 }
 
-func parseHttpSinks(cfg Config, res *resources.Resources, opts *Options) (map[string]Sink, error) {
+func parseHTTPSinks(cfg Config, opts *Options) map[string]Sink {
 	sinks := make(map[string]Sink)
 
-	for k, v := range cfg.Http {
-		sink := http.New(v, &http.HTTPOptions{
+	for k, v := range cfg.HTTP {
+		sink := http.New(v, &http.Options{
 			Logger:  opts.Logger.WithValues("type", "http", "name", k),
 			Metrics: opts.Metrics.WithPrefix("http"),
 		})
 		sinks[k] = sink
 	}
 
-	return sinks, nil
+	return sinks
 }
 
-func parseKafkaSinks(cfg Config, res *resources.Resources, opts *Options) (map[string]Sink, error) {
+func parseKafkaSinks(cfg Config, opts *Options) map[string]Sink {
 	sinks := make(map[string]Sink)
 
 	for k, v := range cfg.Kafka {
-		sink := kafka.New(v, &kafka.KafkaOpts{
+		sink := kafka.New(v, &kafka.Options{
 			Logger:  opts.Logger.WithValues("type", "kafka", "name", k),
 			Metrics: opts.Metrics.WithPrefix("kafka"),
 		})
 		sinks[k] = sink
 	}
 
-	return sinks, nil
+	return sinks
 }
 
 // TODO: no more passing sinks around, we just pass the send channel back.

@@ -63,10 +63,10 @@ uuids:
 				Timestamp: "",
 			},
 		},
-		Uuids: map[string]uuid.Config{
+		UUIDs: map[string]uuid.Config{
 			"id": {
 				Type:    "uuid4",
-				Uniques: uuid.DefaultUuidUniques,
+				Uniques: uuid.DefaultUUIDUniques,
 			},
 		},
 	}
@@ -98,7 +98,7 @@ lists:
 		},
 		RandomStrings: nil,
 		Timestamps:    nil,
-		Uuids:         nil,
+		UUIDs:         nil,
 	}
 
 	assert.Equal(t, expected, cfg)
@@ -215,7 +215,7 @@ func TestRandomStringChars(t *testing.T) {
 	}
 }
 
-func TestUuid(t *testing.T) {
+func TestUUID(t *testing.T) {
 	tests := []struct {
 		input string
 		valid bool

@@ -1,6 +1,6 @@
 package uuid
 
 const (
-	DefaultUuidType    = "uuid4"
-	DefaultUuidUniques = 0
+	DefaultUUIDType    = "uuid4"
+	DefaultUUIDUniques = 0
 )

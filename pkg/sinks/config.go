@@ -6,6 +6,6 @@ import (
 )
 
 type Config struct {
-	Http  map[string]http.Config  `yaml:"http"`
+	HTTP  map[string]http.Config  `yaml:"http"`
 	Kafka map[string]kafka.Config `yaml:"kafka"`
 }

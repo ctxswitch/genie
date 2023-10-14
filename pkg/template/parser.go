@@ -72,7 +72,7 @@ func (p *Parser) parseText() (Node, error) {
 }
 
 func (p *Parser) parseExpression() (Node, error) {
-	var fn filter.FilterFunc
+	var fn filter.Func
 
 	tok := p.curr
 

@@ -44,10 +44,9 @@ func (t *Template) CompileFrom(file string) error {
 		data, err = os.ReadFile(file)
 		if err != nil {
 			return err
-		} else {
-			return t.Compile(string(data))
 		}
-	} else {
+		return t.Compile(string(data))
+	} else { // nolint:revive
 		for _, path := range t.paths {
 			file := fmt.Sprintf("%s/%s", path, file)
 			_, err := os.Stat(file)
@@ -55,9 +54,8 @@ func (t *Template) CompileFrom(file string) error {
 				data, err = os.ReadFile(file)
 				if err != nil {
 					return err
-				} else {
-					return t.Compile(string(data))
 				}
+				return t.Compile(string(data))
 			}
 		}
 	}
@@ -90,7 +88,8 @@ func (t *Template) eval(root Root, res *resources.Resources, vars *variables.Sco
 		case *LetStatement:
 			exp := n.Expression.(*Expression).WithVariables(n.Vars).WithResources(res)
 			e := exp.String()
-			vars.Set(n.Identifier, e)
+			// TODO: handle errors (or at least log them)
+			_ = vars.Set(n.Identifier, e)
 		default:
 			out.WriteString(n.String())
 		}
