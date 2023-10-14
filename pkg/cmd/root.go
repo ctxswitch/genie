@@ -8,10 +8,7 @@ import (
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
-)
-
-var (
-	version = "v0.1.0"
+	"stvz.io/genie/pkg/build"
 )
 
 type GlobalOpts struct {
@@ -51,7 +48,7 @@ func (r *Root) Command() *cobra.Command {
 		Long: `An event payload generator used for interacting with services.  It provides
 				a flexible templating solution to build out predictable payloads matching
 				values for testing and validation`,
-		Version: version,
+		Version: build.Version,
 		Run: func(cmd *cobra.Command, args []string) {
 			// TODO: output help
 		},

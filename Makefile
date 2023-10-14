@@ -1,5 +1,5 @@
 PWD := $(shell pwd)
-LDFLAGS ?= "-s -w -X main.Version=$(VERSION)"
+LDFLAGS ?= "-s -w -X build.Version=$(VERSION)"
 TMPFILE := $(shell mktemp)
 GOPATH := $(shell go env GOPATH)
 GOARCH := $(shell go env GOARCH)
@@ -28,7 +28,7 @@ test:
 	@go test -race ./...
 
 build: verify
-	@CGO_ENABLED=0 GOOS=linux go build -trimpath --ldflags $(LDFLAGS) -o dynamo
+	go build -trimpath --ldflags $(LDFLAGS) -o genie
 
 testcerts:
 	@(cd tests/integration/nginx && ./gen-certs.sh)
