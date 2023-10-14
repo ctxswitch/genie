@@ -9,7 +9,6 @@ type EventConfig struct {
 	Vars        []variables.Config `yaml:"vars"`
 	Template    string             `yaml:"template"`
 	Raw         string             `yaml:"raw"`
-	Sinks       []string           `yaml:"sink"`
 }
 
 func (e *EventConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -20,7 +19,6 @@ func (e *EventConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		Vars        []variables.Config `yaml:"vars"`
 		Template    string             `yaml:"template"`
 		Raw         string             `yaml:"raw"`
-		Sinks       []string           `yaml:"sink"`
 	}
 
 	var defaults = EventConfigDefaults{
@@ -31,10 +29,6 @@ func (e *EventConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	if err := unmarshal(&out); err != nil {
 		return err
-	}
-
-	if out.Sinks == nil {
-		out.Sinks = []string{"stdout"}
 	}
 
 	evt := EventConfig(out)

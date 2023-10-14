@@ -54,43 +54,49 @@ func (g *Generate) RunE(cmd *cobra.Command, args []string) error {
 		os.Exit(1)
 	}
 
-	g.logger.Info("starting event generators", "args", args, "sink", g.sink, "once", g.once)
-
-	manager := events.NewManager(cfg.Events, &events.ManagerOptions{
-		Logger:  g.logger,
-		Metrics: g.metrics,
-		Sinks:   cfg.Sinks,
-		RunOnce: g.once,
-	})
-
-	var evts []string
-	if len(args) > 0 {
-		evts = args
-	} else {
-		evts = cfg.Events.Names()
+	g.logger.Info("starting sink", "args", args, "sink", g.sink)
+	// TODO: Maybe we can add a start to the sinks struct that will take a
+	// name and encasulate the logic below.
+	sink, err := cfg.Sinks.Get(g.sink)
+	if err != nil {
+		g.logger.Error(err, "unable to get sink", "name", g.sink)
+		os.Exit(1)
 	}
 
-	manager.Enable(g.sink, evts...)
+	if err := sink.Init(); err != nil {
+		g.logger.Error(err, "unable to initialize sink", "name", g.sink)
+		os.Exit(1)
+	}
 
-	g.logger.Info("starting sinks")
-	// TODO: Only start sinks that are in use.
-	cfg.Sinks.StartAll()
+	go sink.Start()
 
-	// Wait for context if we are not running once.
+	g.logger.Info("starting event generators", "args", args, "sink", g.sink, "once", g.once)
+	manager := events.NewManager()
+
+	// TODO: pull me out into another function.  Right now we start all
+	// events that are configured, but we should also allow the user to
+	// specify which events to start on the command line.  That will
+	// happen later and should be pretty simple.
+	for name, event := range cfg.Events {
+		g.logger.Info("starting event generator", "name", name)
+		if g.once {
+			event.Run(sink.SendChannel())
+		} else {
+			manager.Start(ctx, event, sink.SendChannel())
+		}
+	}
+
 	if g.once {
-		manager.RunOnce()
+		// TODO: I still don't like the goto.
 		goto shutdown
 	}
 
-	g.logger.Info("starting events manager")
-	manager.StartAll()
 	<-ctx.Done()
-
 	g.logger.Info("shutting down event generators")
-	manager.StopAll()
+	manager.Stop()
 
 shutdown:
-	cfg.Sinks.StopAll()
+	sink.Stop()
 
 	return nil
 }
@@ -102,7 +108,7 @@ func (g *Generate) Command() *cobra.Command {
 		Long:  longDesc,
 		RunE:  g.RunE,
 	}
-	cmd.PersistentFlags().StringVarP(&g.sink, "sink", "s", "", "Override the configured sinks with the sinks provided.")
+	cmd.PersistentFlags().StringVarP(&g.sink, "sink", "s", "stdout", "Override the configured sinks with the sinks provided.")
 	cmd.PersistentFlags().BoolVar(&g.once, "run-once", false, "Run the generator one time and exit.  Logging is disabled by default, when run-once is enabled.  Use --enable-logs to enable.")
 	cmd.PersistentFlags().BoolVar(&g.enableLogs, "enable-logs", false, "Enable log output.")
 	cmd.PersistentFlags().BoolVar(&g.disableLogs, "disable-logs", false, "Disable log output.")

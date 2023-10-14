@@ -3,7 +3,6 @@ package sinks
 import (
 	"fmt"
 	"strings"
-	"sync"
 
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
@@ -30,10 +29,8 @@ type Sinks struct {
 	HTTP   map[string]Sink
 	Kafka  map[string]Sink
 
-	logger   logr.Logger
-	metrics  *strata.Metrics
-	wg       sync.WaitGroup
-	stopOnce sync.Once
+	logger  logr.Logger
+	metrics *strata.Metrics
 }
 
 func Parse(cfg Config, res *resources.Resources, opts *Options) (*Sinks, error) {
@@ -68,11 +65,6 @@ func parseHttpSinks(cfg Config, res *resources.Resources, opts *Options) (map[st
 			Logger:  opts.Logger.WithValues("type", "http", "name", k),
 			Metrics: opts.Metrics.WithPrefix("http"),
 		})
-
-		err := sink.Init()
-		if err != nil {
-			return nil, err
-		}
 		sinks[k] = sink
 	}
 
@@ -87,87 +79,41 @@ func parseKafkaSinks(cfg Config, res *resources.Resources, opts *Options) (map[s
 			Logger:  opts.Logger.WithValues("type", "kafka", "name", k),
 			Metrics: opts.Metrics.WithPrefix("kafka"),
 		})
-
-		err := sink.Init()
-		if err != nil {
-			return nil, err
-		}
 		sinks[k] = sink
 	}
 
 	return sinks, nil
 }
 
-func (s *Sinks) StartAll() {
-	s.wg.Add(1)
-	go func() {
-		defer s.wg.Done()
-		s.Stdout.Start()
-	}()
-
-	for _, v := range s.HTTP {
-		s.wg.Add(1)
-		go func(v Sink) {
-			defer s.wg.Done()
-			v.Start()
-		}(v)
-	}
-
-	for _, v := range s.Kafka {
-		s.wg.Add(1)
-		go func(v Sink) {
-			defer s.wg.Done()
-			v.Start()
-		}(v)
-	}
-}
-
-func (s *Sinks) StopAll() {
-	s.stopOnce.Do(func() {
-		s.logger.Info("stopping stdout sink")
-		s.Stdout.Stop()
-
-		for n, v := range s.HTTP {
-			s.logger.Info("stopping http sink", "name", n)
-			v.Stop()
-		}
-
-		for n, v := range s.Kafka {
-			s.logger.Info("stopping kafka sink", "name", n)
-			v.Stop()
-		}
-
-		s.wg.Wait()
-	})
-}
-
 // TODO: no more passing sinks around, we just pass the send channel back.
-func (s *Sinks) Get(sink string) (chan<- []byte, error) {
+func (s *Sinks) Get(sink string) (Sink, error) {
 	var kind, name string
+	var snk Sink
+	var ok bool
 
 	parts := strings.SplitN(sink, ".", 2)
 	kind = parts[0]
 	if len(parts) == 2 {
 		name = parts[1]
+	} else {
+		name = "stdout"
 	}
 
 	// TODO: add better checks to give back errors on invalid sinks
 
 	switch kind {
 	case "http":
-		if v, ok := s.HTTP[name]; ok {
-			s.logger.Info("using http sink", "name", name)
-			return v.SendChannel(), nil
+		if snk, ok = s.HTTP[name]; !ok {
+			return nil, fmt.Errorf("sink not found: %s", name)
 		}
-		return nil, fmt.Errorf("sink not found: %s", name)
 	case "kafka":
-		if v, ok := s.Kafka[name]; ok {
-			s.logger.Info("using kafka sink", "name", name)
-			return v.SendChannel(), nil
+		if snk, ok = s.Kafka[name]; !ok {
+			return nil, fmt.Errorf("sink not found: %s", name)
 		}
-		return nil, fmt.Errorf("sink not found: %s", name)
+	default:
+		snk = s.Stdout
 	}
 
-	s.logger.Info("using default sink: stdout")
-	return s.Stdout.SendChannel(), nil
+	s.logger.Info("using sink", "kind", kind, "name", name)
+	return snk, nil
 }

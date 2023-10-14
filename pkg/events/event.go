@@ -23,7 +23,6 @@ type EventOptions struct {
 type Event struct {
 	name       string
 	generators int
-	enabled    bool
 	rate       float64
 	vars       *variables.Variables
 	template   *template.Template
@@ -34,7 +33,6 @@ type Event struct {
 	resources *resources.Resources
 
 	wg       sync.WaitGroup
-	sendChan chan<- []byte
 	stopChan chan struct{}
 	stopOnce sync.Once
 }
@@ -63,7 +61,6 @@ func ParseEvent(cfg EventConfig, opts *EventOptions) (*Event, error) {
 		rate:       cfg.RateSeconds,
 		vars:       vars,
 		template:   tmpl,
-		enabled:    false,
 
 		resources: opts.Resources,
 		logger:    opts.Logger,
@@ -73,32 +70,30 @@ func ParseEvent(cfg EventConfig, opts *EventOptions) (*Event, error) {
 	}, nil
 }
 
-func (e *Event) Enable() {
-	e.enabled = true
-}
-
-func (e *Event) WithSendChannel(send chan<- []byte) *Event {
-	e.sendChan = send
-	return e
-}
-
-func (e *Event) run() {
+func (e *Event) Run(sendChan chan<- []byte) {
+	// TODO: there's another case that the send channel could be
+	// closed, so check and if it is then close the stop channel.
+	// If all the events have exited, then stop the manager and
+	// and exit.
+	// TODO: think about sending the context through and using it
+	// as the parent of a timeout context to break out of the run
+	// after a configurable amount of time.
 	p := e.template.Execute(e.resources, e.vars)
-	e.sendChan <- []byte(p)
+	sendChan <- []byte(p)
 }
 
-func (e *Event) Start(ctx context.Context) {
+func (e *Event) Start(ctx context.Context, sendChan chan<- []byte) {
 	e.logger.Info("starting event generator", "count", e.generators)
 	for i := 0; i < e.generators; i++ {
 		e.wg.Add(1)
 		go func() {
 			defer e.wg.Done()
-			e.generate(ctx)
+			e.generate(ctx, sendChan)
 		}()
 	}
 }
 
-func (e *Event) generate(ctx context.Context) {
+func (e *Event) generate(ctx context.Context, sendChan chan<- []byte) {
 	ticker := time.NewTicker(time.Duration(e.rate) * time.Second)
 	defer ticker.Stop()
 
@@ -106,7 +101,7 @@ func (e *Event) generate(ctx context.Context) {
 		select {
 		case <-ticker.C:
 			e.metrics.CounterInc("run")
-			e.run()
+			e.Run(sendChan)
 		case <-e.stopChan:
 			return
 		}
