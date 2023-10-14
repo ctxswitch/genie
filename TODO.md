@@ -6,11 +6,11 @@ Tomorrow, work on import template function, replace filter, and start on the IP 
 * [] Add test subcommand
 
 ### Resources
-* [] Allow integer ranges to use gaussian distribution to output numbers between the min and max
+* [] Allow integer ranges to use gaussian distribution to output numbers between the min and max.  We'll need this for generating events that could be picked up through anomally detection in another project that is being worked on.
 * [] The timestamp package can now move into the resource since config is handled there.
 
 ### Template
-* [] Support integers, floats, and boolean values
+* [] Support integers, floats, and boolean values (that will add the ability to do arithmetic)
 * [] Expressions support for values other than strings
 * [] Add for loop with variable scoping
 * [] Add if/elif/else conditionals

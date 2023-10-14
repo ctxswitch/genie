@@ -35,7 +35,7 @@ func NewGenerate(opts *GlobalOpts) *Generate {
 	}
 }
 
-func (g *Generate) RunE(cmd *cobra.Command, args []string) error {
+func (g *Generate) RunE(cmd *cobra.Command, args []string) error { // nolint:revive
 	ctx, cancel := context.WithCancel(g.ctx)
 	defer cancel()
 
