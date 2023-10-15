@@ -13,8 +13,8 @@ Genie is an templatable event generator.  It can currently be used to generate s
 * `generate`: TODO
 
 #### Options
-* `--sink/-s`: override the configured sink.
-* `--run-once`: output a single event and shut down.
+* `--sink/-s`: Override the configured sink.
+* `--run-once`: Output a single event and shut down.
 
 ## Sinks
 

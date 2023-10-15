@@ -1,4 +1,5 @@
 PWD := $(shell pwd)
+VERSION := $(shell git describe --tags --always --dirty)
 LDFLAGS ?= "-s -w -X build.Version=$(VERSION)"
 TMPFILE := $(shell mktemp)
 GOPATH := $(shell go env GOPATH)
