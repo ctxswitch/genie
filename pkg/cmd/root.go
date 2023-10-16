@@ -50,12 +50,13 @@ func (r *Root) Command() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "genie",
 		Short: "Genie is a event payload generator.",
-		Long: `An event payload generator used for interacting with services.  It provides
-				a flexible templating solution to build out predictable payloads matching
-				values for testing and validation`,
+		Long: `
+An event payload generator used for interacting with services.  It provides
+a flexible templating solution to build out predictable payloads matching
+values for the testing and validation of event pipelines.`,
 		Version: build.Version,
 		Run: func(cmd *cobra.Command, args []string) {
-			// TODO: output help
+			cmd.Help()
 		},
 	}
 

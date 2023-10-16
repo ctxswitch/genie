@@ -6,7 +6,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o genie main.go
 
 FROM alpine:latest
-COPY --from=builder /usr/src/app/genie.d /etc/genie.d
+COPY --from=builder /usr/src/app/examples /etc/genie.d
 COPY --from=builder /usr/src/app/genie /genie
 RUN : \
   && apk update \

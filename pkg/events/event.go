@@ -25,7 +25,7 @@ type EventOptions struct {
 type Event struct {
 	name       string
 	generators int
-	rate       float64
+	interval   float64
 	vars       *variables.Variables
 	template   *template.Template
 
@@ -62,7 +62,7 @@ func ParseEvent(cfg EventConfig, opts *EventOptions) (*Event, error) {
 	return &Event{
 		name:       cfg.Name,
 		generators: cfg.Generators,
-		rate:       cfg.RateSeconds,
+		interval:   cfg.IntervalSeconds,
 		vars:       vars,
 		template:   tmpl,
 
@@ -102,7 +102,7 @@ func (e *Event) Start(ctx context.Context, sendChan chan<- []byte) {
 // generate is the main loop for an event generator.  It will run the event
 // at the configured interval.
 func (e *Event) generate(ctx context.Context, sendChan chan<- []byte) { // nolint:unparam,revive
-	ticker := time.NewTicker(time.Duration(e.rate) * time.Second)
+	ticker := time.NewTicker(time.Duration(e.interval) * time.Second)
 	defer ticker.Stop()
 
 	for {

@@ -33,8 +33,8 @@ build: verify
 
 # Temporary.  Will set up automated builds later.
 publish:
-	@docker build . -t strataviz/genie:0.1.0
-	@docker tag strataviz/genie:0.1.0 strataviz/genie:latest
+	@docker build . -t strataviz/genie:0.1.1
+	@docker tag strataviz/genie:0.1.1 strataviz/genie:latest
 	@docker push strataviz/genie --all-tags
 
 testcerts:
@@ -52,9 +52,3 @@ clean:
 	@find . -name '*.test' | xargs rm -fv
 	@find . -name '*~' | xargs rm -fv
 	@find . -name '*.zip' | xargs rm -fv
-
-# DELETE ME
-.PHONY: run
-run:
-	$(eval POD := $(shell kubectl get pods -n strataviz -l name=strataviz-analytics -o=custom-columns=:metadata.name --no-headers))
-	kubectl exec -n strataviz -it pod/$(POD) -- bash -c "go run main.go -s kafka.kind"

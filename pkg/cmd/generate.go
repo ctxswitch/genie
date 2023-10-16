@@ -13,9 +13,11 @@ import (
 
 var usage = `generate [NAME...] [ARG...]`
 var shortDesc = `Start the generator for one or many events.`
-var longDesc = `Start the generator for one or many events. By default all configured
-event generators will be run on startup. Individual events can be specified by using the event
-name. Generate specific arguments can be added as after the event name.`
+var longDesc = `
+Start the generator for one or many events. By default all configured
+event generators will be run on startup. Individual events can be
+specified by using the event name. Generate specific arguments can
+be added as after the event name.`
 
 // Generate is the command that starts the event generators.
 type Generate struct {
