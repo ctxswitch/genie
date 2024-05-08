@@ -18,6 +18,18 @@ resources:
     size:
       min: 300
       max: 900
+    bytes_sent:
+      min: 100
+      max: 1000
+      distribution: normal
+      stddev: 50
+      mean: 300
+    latency:
+      min: 100
+      max: 2000
+      distribution: normal
+      stddev: 150
+      mean: 400
   random_strings:
     ten:
       size: 10

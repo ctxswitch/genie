@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"ctx.sh/strata"
@@ -75,12 +76,32 @@ func (g *Generate) RunE(cmd *cobra.Command, args []string) error { // nolint:rev
 
 	go sink.Start()
 
+	evt := "all"
+	if len(args) > 0 {
+		if !cfg.HasEvent(args[0]) {
+			g.logger.Error(fmt.Errorf("event %s not found", args[0]), "starting events")
+			os.Exit(1)
+		}
+		evt = args[0]
+	}
+
+	if !cfg.HasEvents() {
+		g.logger.Error(fmt.Errorf("no events were found in the configuration"), "starting events", "config", path)
+		os.Exit(1)
+	}
+
+	g.logger.Info("starting event generators", "event", evt)
+
 	manager := events.NewManager()
 	// TODO: pull me out into another function.  Right now we start all
 	// events that are configured, but we should also allow the user to
 	// specify which events to start on the command line.  That will
 	// happen later and should be pretty simple.
-	for _, event := range cfg.Events {
+	for name, event := range cfg.Events {
+		if evt != "all" && name != evt {
+			continue
+		}
+
 		if g.once {
 			event.Run(sink.SendChannel())
 		} else {
@@ -110,6 +131,7 @@ func (g *Generate) Command() *cobra.Command {
 		Short: shortDesc,
 		Long:  longDesc,
 		RunE:  g.RunE,
+		Args:  cobra.MaximumNArgs(1),
 	}
 	cmd.PersistentFlags().StringVarP(&g.sink, "sink", "s", "stdout", "Override the configured sinks with the sinks provided.")
 	cmd.PersistentFlags().BoolVar(&g.once, "run-once", false, "Run the generator one time and exit.  Logging is disabled by default, when run-once is enabled.  Use --enable-logs to enable.")

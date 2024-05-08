@@ -90,3 +90,12 @@ func Load(opts *LoadOptions) (*Config, error) {
 
 	return out, nil
 }
+
+func (c *Config) HasEvents() bool {
+	return len(c.Events) > 0
+}
+
+func (c *Config) HasEvent(name string) bool {
+	_, has := c.Events[name]
+	return has
+}

@@ -12,6 +12,7 @@ require (
 	github.com/twmb/franz-go v1.15.0
 	github.com/twmb/franz-go/pkg/kadm v1.9.2
 	go.uber.org/zap v1.25.0
+	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842
 	gopkg.in/yaml.v2 v2.4.0
 )
 

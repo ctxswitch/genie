@@ -10,9 +10,9 @@ Genie is an templatable event generator.  It can currently be used to generate p
 
 ## Commands
 
-### generate
+### generate [EVENT] [ARGS...]
 
-The generate command starts up the configured event generators.
+The generate command starts up the configured event generators. An optional event can be specified to limit the generator to a single event.  If an event is not specified, the generator will run all configured events.
 
 #### Options
 
@@ -161,8 +161,10 @@ The integer range resource renders a random value between 2 numbers.  The follow
 | ---- | ----------- | ------- |
 | min | the mininimum number of the range | 0 |
 | max | the maximum number of the range | 10 |
-| step | the number used to increment the value when the range is generated | 1 |
 | pad | left pad `0`'s to the number when it is accessed by the template | 0 |
+| distribution | the distribution of the generated integers (uniform, normal). | uniform |
+| stddev | ***(normal distribution)*** sets the size of a standard deviation for a range that is normally distributed | (max-min)/10 |
+| mean | ***(normal distribution)*** sets the mean for the range that is normally distributed | (max-min)/2 |
 
 ##### IP Address
 
@@ -207,7 +209,7 @@ The UUID resource renders uuid1 or uuid4 formatted unique identifiers.
 
 #### Filters
 
-***Still a work in progress.***
+***Work in progress.***
 
 Filters can be added to variables using the `|` pipe character.
 
