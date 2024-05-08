@@ -4,10 +4,12 @@ import "fmt"
 
 // Config is the configuration for the integer_range resource.
 type Config struct {
-	Min  int64  `yaml:"min"`
-	Max  int64  `yaml:"max"`
-	Step int64  `yaml:"step"`
-	Pad  uint32 `yaml:"pad"`
+	Min          int64  `yaml:"min"`
+	Max          int64  `yaml:"max"`
+	Pad          uint32 `yaml:"pad"`
+	Distribution string `yaml:"distribution"`
+	StdDev       *float64
+	Mean         *int64
 }
 
 // validate ensures that the configuration is valid.
@@ -17,6 +19,18 @@ func (i *Config) validate() error {
 		return fmt.Errorf("max (%d) in integer_range must be greater than zero and the minimum value", i.Max)
 	}
 
+	if i.Distribution != "uniform" && i.Distribution != "normal" {
+		return fmt.Errorf("distribution (%s) in integer_range must be either 'uniform' or 'normal'", i.Distribution)
+	}
+
+	if i.StdDev != nil && *i.StdDev > float64(i.Max-i.Min) {
+		return fmt.Errorf("standard deviation (%f) in integer_range must be less than the range (%d)", *i.StdDev, i.Max-i.Min)
+	}
+
+	if i.Mean != nil && (*i.Mean < i.Min || *i.Mean > i.Max) {
+		return fmt.Errorf("mean (%d) in integer_range must be in the range of (%d, %d)", *i.Mean, i.Min, i.Max)
+	}
+
 	return nil
 }
 
@@ -24,10 +38,10 @@ func (i *Config) validate() error {
 func (i *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type ConfigDefaulted Config
 	var defaults = ConfigDefaulted{
-		Min:  DefaultIntegerRangeMin,
-		Max:  DefaultIntegerRangeMax,
-		Step: DefaultIntegerRangeStep,
-		Pad:  DefaultIntegerRangePad,
+		Min:          DefaultIntegerRangeMin,
+		Max:          DefaultIntegerRangeMax,
+		Pad:          DefaultIntegerRangePad,
+		Distribution: DefaultIntegerRangeDistribution,
 	}
 
 	out := defaults

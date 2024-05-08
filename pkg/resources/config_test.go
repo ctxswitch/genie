@@ -41,10 +41,10 @@ uuids:
 	expected := &Config{
 		IntegerRanges: map[string]integer_range.Config{
 			"range1": {
-				Min:  1,
-				Max:  5,
-				Pad:  3,
-				Step: integer_range.DefaultIntegerRangeStep,
+				Min:          1,
+				Max:          5,
+				Pad:          3,
+				Distribution: integer_range.DefaultIntegerRangeDistribution,
 			},
 		},
 		Lists: map[string]list.Config{
@@ -114,7 +114,6 @@ func TestDefaultedIntegerRange(t *testing.T) {
 	assert.Equal(t, integer_range.DefaultIntegerRangeMax, cfg.Max)
 	assert.Equal(t, integer_range.DefaultIntegerRangeMin, cfg.Min)
 	assert.Equal(t, integer_range.DefaultIntegerRangePad, cfg.Pad)
-	assert.Equal(t, integer_range.DefaultIntegerRangeStep, cfg.Step)
 }
 
 func TestIntegerRange(t *testing.T) {
