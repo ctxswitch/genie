@@ -32,6 +32,11 @@ func TestScan(t *testing.T) {
 			NewToken(TokenPeriod, "."),
 			NewToken(TokenIdentifier, "name"),
 		}},
+		{`<< float_range.name >>`, []Token{
+			NewToken(TokenResource, "float_range"),
+			NewToken(TokenPeriod, "."),
+			NewToken(TokenIdentifier, "name"),
+		}},
 		{`<< random_string.name >>`, []Token{
 			NewToken(TokenResource, "random_string"),
 			NewToken(TokenPeriod, "."),

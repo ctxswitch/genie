@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"stvz.io/genie/pkg/resources/float_range"
 	"stvz.io/genie/pkg/resources/integer_range"
 	"stvz.io/genie/pkg/resources/ipaddr"
 	"stvz.io/genie/pkg/resources/list"
@@ -18,6 +19,7 @@ type Resource interface {
 type Resources struct {
 	Lists         map[string]Resource
 	IntegerRanges map[string]Resource
+	FloatRanges   map[string]Resource
 	RandomStrings map[string]Resource
 	UUIDs         map[string]Resource
 	Timestamps    map[string]Resource
@@ -29,6 +31,7 @@ type Resources struct {
 func New(block Config) *Resources {
 	return &Resources{
 		IntegerRanges: parseIntegerRanges(block),
+		FloatRanges:   parseFloatRanges(block),
 		RandomStrings: parseRandomStrings(block),
 		Lists:         parseLists(block),
 		Timestamps:    parseTimestamps(block),
@@ -43,6 +46,17 @@ func parseIntegerRanges(res Config) map[string]Resource {
 
 	for k, v := range res.IntegerRanges {
 		out[k] = integer_range.New(v)
+	}
+
+	return out
+}
+
+// parseFloatRanges parses a map of float ranges into a map of resources.
+func parseFloatRanges(res Config) map[string]Resource {
+	out := make(map[string]Resource)
+
+	for k, v := range res.FloatRanges {
+		out[k] = float_range.New(v)
 	}
 
 	return out
@@ -111,6 +125,8 @@ func (r *Resources) Get(rtype string, name string) (Resource, error) {
 	switch rtype {
 	case "list":
 		return r.GetList(name)
+	case "float_range":
+		return r.GetFloatRange(name)
 	case "integer_range":
 		return r.GetIntegerRange(name)
 	case "random_string":
@@ -140,6 +156,15 @@ func (r *Resources) GetList(name string) (Resource, error) {
 // GetIntegerRange returns an integer range resource by name.
 func (r *Resources) GetIntegerRange(name string) (Resource, error) {
 	if resource, ok := r.IntegerRanges[name]; ok {
+		return resource, nil
+	}
+
+	return nil, NotFoundError
+}
+
+// GetFloatRange returns a float range resource by name.
+func (r *Resources) GetFloatRange(name string) (Resource, error) {
+	if resource, ok := r.FloatRanges[name]; ok {
 		return resource, nil
 	}
 
