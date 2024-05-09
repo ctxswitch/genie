@@ -153,6 +153,22 @@ Expressions can be rendered using the delimiters `<<` and `>>`, with the variabl
 
 #### Resources
 
+##### Float Range
+
+The float range resource renders random floats between two values.  The following configuration values are supported:
+
+| Name | Description | Default |
+| ---- | ----------- | ------- |
+| min | The minimum number of the range. In the case of normalized and exponential distributions, it acts as a floor and clamps any generated value less than the minimum. | 0.0 |
+| max | The maximum number of the range.  Like minimum, for normalized and exponential distributions, it clamps any generated value greater than the maximum. | 10.0 |
+| distribution | The distribution of the generated numbers.  This can be `uniform`, `exponential`, and `normal`. | uniform |
+| stddev | When distribution is set to normal, this represents the standard deviation. | (max-min)/8 |
+| mean | When distribution is set to normal, this represents the mean of the values generated. | (max-min/2) |
+| rate | When distribution is set to exponential, this represents the rate of occurrences in a given time interval | 1.0 |
+| format | The expected format for the string representation of the floating point number.  Supports: <ul><li>`none`: no exponent</li><li>`decimal`: decimal representation 'e'</li><li>`decimal_capitalize`: decimal representation 'E'</li><li>`large`: 'e' for large exponents</li><li>`large_capitalize`: 'E' for large exponents</li><li>`binary`: a binary exponent</li><li>`hex`: hexidecimal fraction and binary exponent</li></ul> | none |
+| precision | The number of digits (excuding the exponent) that will be printed | 5 |  
+
+
 ##### Integer Range
 
 The integer range resource renders a random value between 2 numbers.  The following configuration values are supported:

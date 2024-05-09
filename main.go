@@ -16,6 +16,10 @@ import (
 	"stvz.io/genie/pkg/cmd"
 )
 
+const (
+	DefaultMetricsPort = 9090
+)
+
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGSTOP)
 	defer cancel()
@@ -56,7 +60,7 @@ func main() {
 	go func() {
 		defer obs.Done()
 		err := metrics.Start(strata.ServerOpts{
-			Port: 9090,
+			Port: DefaultMetricsPort,
 		})
 		if err != nil && err != http.ErrServerClosed {
 			logger.Error(err, "metrics server start failed")

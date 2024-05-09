@@ -30,6 +30,50 @@ resources:
       distribution: normal
       stddev: 150
       mean: 400
+    # TODO: move to a counter resource
+    prom_gc_count:
+      min: 1
+      max: 10
+  float_ranges:
+    value_exp:
+      min: 0.00
+      max: 10000.0
+      distribution: exponential
+      rate: 1.25
+    value_norm:
+      min: 0.00
+      max: 10.0
+      distribution: normal
+      stddev: 1.0
+      mean: 5.0
+    value_norm_formatted:
+      min: 0.00
+      max: 10000000.0
+      distribution: normal
+      stddev: 10000.0
+      mean: 500000.0
+      format: "decimal"
+      precision: 5
+    go_gc_duration_seconds_0:
+      min: 2.00e-05
+      distribution: exponential
+      rate: 2.5
+    go_gc_duration_seconds_0_25:
+      min: 7.00e-05
+      distribution: exponential
+      rate: 2.5
+    go_gc_duration_seconds_0_5:
+      min: 1.30e-04
+      distribution: exponential
+      rate: 2.5
+    go_gc_duration_seconds_0_75:
+      min: 1.75e-04
+      distribution: exponential
+      rate: 2.5
+    go_gc_duration_seconds_1:
+      min: 2.00e-04
+      distribution: exponential
+      rate: 2.5
   random_strings:
     ten:
       size: 10

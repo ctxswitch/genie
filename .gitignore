@@ -17,6 +17,9 @@ vendor/
 
 *_save/
 
+tmp/
+.venv/
+
 # Don't store test certs
 tests/integration/nginx/conf/ssl/ca.*
 tests/integration/nginx/conf/ssl/server.*

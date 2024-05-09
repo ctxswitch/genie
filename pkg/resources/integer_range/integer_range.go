@@ -22,16 +22,6 @@ type IntegerRange struct {
 func New(cfg Config) *IntegerRange {
 	rand.Seed(uint64(time.Now().UnixNano()))
 
-	if cfg.StdDev == nil {
-		cfg.StdDev = new(float64)
-		*cfg.StdDev = float64(cfg.Max-cfg.Min) / 10
-	}
-
-	if cfg.Mean == nil {
-		cfg.Mean = new(int64)
-		*cfg.Mean = (cfg.Max - cfg.Min) / 2
-	}
-
 	return &IntegerRange{
 		min:          cfg.Min,
 		max:          cfg.Max,
@@ -76,5 +66,7 @@ func (i *IntegerRange) Get() string {
 		integer = int64(rand.Int63n(i.max-i.min) + i.min)
 	}
 
+	// TODO: Move this to strconv and then move padding to a filter and out of the resource.
+	// i.e. <<integer_range.item|pad(5)>>
 	return fmt.Sprintf("%0*d", i.pad, integer)
 }

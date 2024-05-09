@@ -54,6 +54,16 @@ func (i *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
+	if tmpl.StdDev == nil {
+		tmpl.StdDev = new(float64)
+		*tmpl.StdDev = float64(tmpl.Max-tmpl.Min) / 8
+	}
+
+	if tmpl.Mean == nil {
+		tmpl.Mean = new(int64)
+		*tmpl.Mean = (tmpl.Max - tmpl.Min) / 2
+	}
+
 	*i = tmpl
 	return nil
 }

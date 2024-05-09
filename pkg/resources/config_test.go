@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
+	"stvz.io/genie/pkg/resources/float_range"
 	"stvz.io/genie/pkg/resources/integer_range"
 	"stvz.io/genie/pkg/resources/list"
 	"stvz.io/genie/pkg/resources/random_string"
@@ -19,6 +20,12 @@ integer_ranges:
     min: 1
     max: 5
     pad: 3
+float_ranges:
+  range1:
+    min: 1.0
+    max: 5.0
+    distribution: exp
+    rate: 1.0
 lists:
   numbers:
     - one
@@ -45,6 +52,20 @@ uuids:
 				Max:          5,
 				Pad:          3,
 				Distribution: integer_range.DefaultIntegerRangeDistribution,
+				StdDev:       &[]float64{0.5}[0],
+				Mean:         &[]int64{2}[0],
+			},
+		},
+		FloatRanges: map[string]float_range.Config{
+			"range1": {
+				Min:          1.0,
+				Max:          5.0,
+				Distribution: "exp",
+				Rate:         1.0,
+				StdDev:       &[]float64{0.5}[0],
+				Mean:         &[]float64{2.0}[0],
+				Format:       float_range.DefaultFloatRangeFormat,
+				Precision:    float_range.DefaultFloatRangePrecision,
 			},
 		},
 		Lists: map[string]list.Config{
@@ -105,8 +126,46 @@ lists:
 
 }
 
+func TestDefaultedFloatRange(t *testing.T) {
+	in := "{}"
+	cfg := &float_range.Config{}
+	err := yaml.Unmarshal([]byte(in), cfg)
+	assert.Nil(t, err)
+
+	assert.Equal(t, float_range.DefaultFloatRangeMax, cfg.Max)
+	assert.Equal(t, float_range.DefaultFloatRangeMin, cfg.Min)
+}
+
+func TestFloatRange(t *testing.T) {
+	tests := []struct {
+		input string
+		valid bool
+	}{
+		// min is defaulted to 0
+		{"max: -1.0", false},
+		{"max: 0.0", false},
+		{"max: 1.0", true},
+		{"max: 1000.0", true},
+		{"max: 1000.0\nmin: 1000.0", false},
+		{"max: 1000.0\nmin: 1001.0", false},
+		{"max: 1.7e+308", true},
+		{"max: 1.8e+308", false},
+		{"min: -1.0\nmax: 1.0", true},
+	}
+
+	for _, tt := range tests {
+		cfg := &float_range.Config{}
+		err := yaml.Unmarshal([]byte(tt.input), cfg)
+		if tt.valid {
+			assert.Nil(t, err, tt.input)
+		} else {
+			assert.NotNil(t, err, tt.input)
+		}
+	}
+}
+
 func TestDefaultedIntegerRange(t *testing.T) {
-	in := "min: 0"
+	in := "{}"
 	cfg := &integer_range.Config{}
 	err := yaml.Unmarshal([]byte(in), cfg)
 	assert.Nil(t, err)
@@ -121,6 +180,7 @@ func TestIntegerRange(t *testing.T) {
 		input string
 		valid bool
 	}{
+		// min is defaulted to 0
 		{"max: -1", false},
 		{"max: 0", false},
 		{"max: 1", true},

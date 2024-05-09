@@ -1,6 +1,7 @@
 package template
 
 var builtins = map[string]TokenType{
+	"float_range":   TokenResource,
 	"integer_range": TokenResource,
 	"list":          TokenResource,
 	"random_string": TokenResource,
