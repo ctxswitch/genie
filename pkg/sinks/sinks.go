@@ -6,6 +6,7 @@ import (
 
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
+	"stvz.io/genie/pkg/resources"
 	"stvz.io/genie/pkg/sinks/http"
 	"stvz.io/genie/pkg/sinks/kafka"
 	"stvz.io/genie/pkg/sinks/stdout"
@@ -21,8 +22,9 @@ type Sink interface {
 
 // Options are the options for a collection of configured sinks.
 type Options struct {
-	Logger  logr.Logger
-	Metrics *strata.Metrics
+	Logger    logr.Logger
+	Metrics   *strata.Metrics
+	Resources *resources.Resources
 }
 
 // Sinks is a collection of configured sinks.
@@ -60,8 +62,9 @@ func parseHTTPSinks(cfg Config, opts *Options) map[string]Sink {
 
 	for k, v := range cfg.HTTP {
 		sink := http.New(v, &http.Options{
-			Logger:  opts.Logger.WithValues("type", "http", "name", k),
-			Metrics: opts.Metrics.WithPrefix("http"),
+			Logger:    opts.Logger.WithValues("type", "http", "name", k),
+			Metrics:   opts.Metrics.WithPrefix("http"),
+			Resources: opts.Resources,
 		})
 		sinks[k] = sink
 	}

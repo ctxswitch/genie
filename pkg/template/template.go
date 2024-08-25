@@ -69,6 +69,7 @@ func (t *Template) CompileFrom(file string) error {
 // in with events).  It's going to be required if we allow our templates to be used
 // in other configurations (i.e. sinks).
 func (t *Template) Execute(res *resources.Resources, vars *variables.Variables) string {
+	// TODO: concurrent map writes on the variables here...
 	return t.eval(t.root, res, variables.NewScopedVariables(vars))
 }
 
