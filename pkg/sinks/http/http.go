@@ -15,8 +15,9 @@ import (
 
 // Options are the options for an HTTP sink.
 type Options struct {
-	Logger  logr.Logger
-	Metrics *strata.Metrics
+	Logger    logr.Logger
+	Metrics   *strata.Metrics
+	Resources *resources.Resources
 }
 
 // HTTP is an HTTP sink.
@@ -41,12 +42,13 @@ type HTTP struct {
 // New returns a new HTTP sink.
 func New(cfg Config, opts *Options) *HTTP {
 	return &HTTP{
-		url:      cfg.URL,
-		method:   cfg.Method,
-		headers:  newHeaders(cfg.Headers),
-		sendChan: make(chan []byte),
-		logger:   opts.Logger,
-		metrics:  opts.Metrics,
+		url:       cfg.URL,
+		method:    cfg.Method,
+		headers:   newHeaders(cfg.Headers),
+		sendChan:  make(chan []byte),
+		logger:    opts.Logger,
+		metrics:   opts.Metrics,
+		resources: opts.Resources,
 	}
 }
 

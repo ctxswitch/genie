@@ -67,8 +67,9 @@ func Load(opts *LoadOptions) (*Config, error) {
 
 	res := resources.New(config.Resources)
 	snks := sinks.New(config.Sinks, &sinks.Options{
-		Logger:  opts.Logger,
-		Metrics: opts.Metrics,
+		Logger:    opts.Logger,
+		Metrics:   opts.Metrics,
+		Resources: res,
 	})
 
 	evts, err := events.Parse(config.Events, &events.Options{
