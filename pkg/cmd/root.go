@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
+	"ctx.sh/genie/pkg/build"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
-	"stvz.io/genie/pkg/build"
 )
 
 // GlobalOpts are the global options for all commands

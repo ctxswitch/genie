@@ -1,13 +1,13 @@
 package resources
 
 import (
-	"stvz.io/genie/pkg/resources/float_range"
-	"stvz.io/genie/pkg/resources/integer_range"
-	"stvz.io/genie/pkg/resources/ipaddr"
-	"stvz.io/genie/pkg/resources/list"
-	"stvz.io/genie/pkg/resources/random_string"
-	"stvz.io/genie/pkg/resources/timestamp"
-	"stvz.io/genie/pkg/resources/uuid"
+	"ctx.sh/genie/pkg/resources/float_range"
+	"ctx.sh/genie/pkg/resources/integer_range"
+	"ctx.sh/genie/pkg/resources/ipaddr"
+	"ctx.sh/genie/pkg/resources/list"
+	"ctx.sh/genie/pkg/resources/random_string"
+	"ctx.sh/genie/pkg/resources/timestamp"
+	"ctx.sh/genie/pkg/resources/uuid"
 )
 
 // Resource defines the interface all resources must adhear to.

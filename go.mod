@@ -1,4 +1,4 @@
-module stvz.io/genie
+module ctx.sh/genie
 
 go 1.20
 

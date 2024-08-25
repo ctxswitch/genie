@@ -3,10 +3,10 @@ package template
 import (
 	"testing"
 
+	"ctx.sh/genie/pkg/resources"
+	"ctx.sh/genie/pkg/variables"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"stvz.io/genie/pkg/resources"
-	"stvz.io/genie/pkg/variables"
 )
 
 var (

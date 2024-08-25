@@ -8,12 +8,12 @@ import (
 	"sync"
 	"syscall"
 
+	"ctx.sh/genie/pkg/cmd"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"stvz.io/genie/pkg/cmd"
 )
 
 const (

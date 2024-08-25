@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
+	"ctx.sh/genie/pkg/resources"
+	"ctx.sh/genie/pkg/variables"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
-	"stvz.io/genie/pkg/resources"
-	"stvz.io/genie/pkg/variables"
 )
 
 // Options are the options for an HTTP sink.
