@@ -1,8 +1,8 @@
 package sinks
 
 import (
-	"stvz.io/genie/pkg/sinks/http"
-	"stvz.io/genie/pkg/sinks/kafka"
+	"ctx.sh/genie/pkg/sinks/http"
+	"ctx.sh/genie/pkg/sinks/kafka"
 )
 
 // Config is the top-level configuration for a collection of sinks.

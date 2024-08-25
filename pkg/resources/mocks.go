@@ -1,6 +1,6 @@
 package resources
 
-import "stvz.io/genie/pkg/resources/list"
+import "ctx.sh/genie/pkg/resources/list"
 
 func MockResources() *Resources {
 	lists := map[string]Resource{

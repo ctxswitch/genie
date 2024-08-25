@@ -1,6 +1,6 @@
 package events
 
-import "stvz.io/genie/pkg/variables"
+import "ctx.sh/genie/pkg/variables"
 
 // EventConfig is the configuration for a single event.
 type EventConfig struct {

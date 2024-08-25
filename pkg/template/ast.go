@@ -1,9 +1,9 @@
 package template
 
 import (
-	"stvz.io/genie/pkg/filter"
-	"stvz.io/genie/pkg/resources"
-	"stvz.io/genie/pkg/variables"
+	"ctx.sh/genie/pkg/filter"
+	"ctx.sh/genie/pkg/resources"
+	"ctx.sh/genie/pkg/variables"
 )
 
 type Node interface {

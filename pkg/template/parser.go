@@ -3,7 +3,7 @@ package template
 import (
 	"fmt"
 
-	"stvz.io/genie/pkg/filter"
+	"ctx.sh/genie/pkg/filter"
 )
 
 type ParserFunc func() (Node, error)

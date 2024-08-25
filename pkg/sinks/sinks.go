@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	"ctx.sh/genie/pkg/resources"
+	"ctx.sh/genie/pkg/sinks/http"
+	"ctx.sh/genie/pkg/sinks/kafka"
+	"ctx.sh/genie/pkg/sinks/stdout"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
-	"stvz.io/genie/pkg/resources"
-	"stvz.io/genie/pkg/sinks/http"
-	"stvz.io/genie/pkg/sinks/kafka"
-	"stvz.io/genie/pkg/sinks/stdout"
 )
 
 // Sink is the interface that all sinks must implement.

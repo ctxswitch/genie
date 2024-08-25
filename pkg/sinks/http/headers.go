@@ -1,7 +1,7 @@
 package http
 
 import (
-	"stvz.io/genie/pkg/template"
+	"ctx.sh/genie/pkg/template"
 )
 
 // Headers is a map of names with the corresponding templates.  Headers

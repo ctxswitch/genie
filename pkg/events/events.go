@@ -1,9 +1,9 @@
 package events
 
 import (
+	"ctx.sh/genie/pkg/resources"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
-	"stvz.io/genie/pkg/resources"
 )
 
 // Options are the options for a collection of configured event generators.

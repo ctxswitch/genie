@@ -5,12 +5,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"ctx.sh/genie/pkg/events"
+	"ctx.sh/genie/pkg/resources"
+	"ctx.sh/genie/pkg/sinks"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
 	"gopkg.in/yaml.v2"
-	"stvz.io/genie/pkg/events"
-	"stvz.io/genie/pkg/resources"
-	"stvz.io/genie/pkg/sinks"
 )
 
 // LoadOptions are the options for loading the config.

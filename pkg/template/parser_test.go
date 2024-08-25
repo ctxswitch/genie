@@ -5,9 +5,9 @@ import (
 	"runtime"
 	"testing"
 
+	"ctx.sh/genie/pkg/filter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"stvz.io/genie/pkg/filter"
 )
 
 func TestParse(t *testing.T) {
