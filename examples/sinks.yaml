@@ -1,7 +1,7 @@
 sinks:
   http:
     localhost:
-      url: http://localhost:8081
+      url: http://localhost:8081/ingest
       method: post
       headers:
         - name: Content-Type
