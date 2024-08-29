@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -43,7 +44,7 @@ type HTTP struct {
 func New(cfg Config, opts *Options) *HTTP {
 	return &HTTP{
 		url:       cfg.URL,
-		method:    cfg.Method,
+		method:    strings.ToUpper(cfg.Method),
 		headers:   newHeaders(cfg.Headers),
 		sendChan:  make(chan []byte),
 		logger:    opts.Logger,
