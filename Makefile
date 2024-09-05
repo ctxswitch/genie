@@ -17,6 +17,10 @@ LOCALBIN ?= $(shell pwd)/bin
 GOLANGCI_LINT_VERSION ?= v1.60.3
 GOLANGCI_LINT = $(LOCALBIN)/golangci-lint
 
+TARGETDIR ?= $(PWD)/dist
+GENIE_BIN ?= genie
+GENIE_RELEASE_TARGET ?= $(TARGETDIR)/seactl-$(SYSTEM)-$(ARCH).tar.gz
+
 deps: $(CONTROLLER_GEN) $(KUSTOMIZE) $(GOLANGCI_LINT) $(ADDLICENSE)
 
 $(LOCALBIN):
@@ -48,6 +52,14 @@ vet:
 .PHONY: build
 build: verify
 	go build -trimpath --ldflags $(LDFLAGS) -o genie
+
+.PHONY: build-release
+build-release: $(TARGETDIR) $(GENIE_RELEASE_TARGET)
+
+$(GENIE_RELEASE_TARGET):
+	GOOS=$(SYSTEM) GOARCH=$(ARCH) CGO_ENABLED=0 go build -trimpath --ldflags "-s -w -X ctx.sh/genie/pkg/build.Version=$(VERSION)" -o $(TARGETDIR)/$(GENIE_BIN) main.go && \
+		tar -C $(TARGETDIR) -zcvf $@ $(GENIE_BIN) && \
+		rm -f $(TARGETDIR)/$(GENIE_BIN)
 
 .PHONY: testcerts
 testcerts:
