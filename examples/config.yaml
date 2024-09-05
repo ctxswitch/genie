@@ -5,24 +5,9 @@ events:
       - name: version
         value: v1
     template: planet_logs.tmpl
-  - name: raw_logs
-    generators: 10
-    raw: >
-      <<list.left_names>> <<list.right_names>>
-  - name: latency_measurement
-    generators: 1
-    raw: >
-      {"application": "foo", "latency": <<integer_range.latency>>}
   - name: nginx_logs
     generators: 1
     raw: >
       <# $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent" "$http_x_forwarded_for"'; #>
       <<ipaddr.internal>> - - [<<timestamp.now_common_log>>] "<<list.method>> <<list.path>> HTTP/1.1" <<list.status_code>> <<integer_range.bytes_sent>> "-" "<<list.user_agent>>" "<<ipaddr.external>>"
-  - name: float_range_exp
-    generators: 1
-    raw: >
-      {"application": "foo", "value": <<float_range.value_exp>>}
-  - name: float_range_norm
-    generators: 1
-    raw: >
-      {"application": "foo", "value": <<float_range.value_norm_formatted>>}
+  
