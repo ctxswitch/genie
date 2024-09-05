@@ -75,7 +75,8 @@ jobs:
           images: |
             ctxsh/genie
           tags: |
-            type=semver,value=latest,pattern={{version}}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{version}},value=latest
             
       - name: build and push to dockerhub
         uses: docker/build-push-action@v6
