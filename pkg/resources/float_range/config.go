@@ -58,7 +58,7 @@ func (i *Config) validate() error {
 	return nil
 }
 
-// UnmarshalYAML implements yaml.Unmarshaler for defaulting the float_range
+// UnmarshalYAML implements yaml.Unmarshaler for defaulting the float_range.
 func (i *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type ConfigDefaulted Config
 	var defaults = ConfigDefaulted{

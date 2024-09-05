@@ -105,7 +105,7 @@ func (p *Parser) parseExpression() (Node, error) {
 func (p *Parser) parseStatement() (Node, error) {
 	// Probably just need to switch here based on type?
 	tok := p.curr
-	switch p.curr.Literal {
+	switch p.curr.Literal { //nolint:gocritic
 	case "let":
 		if err := p.nextExpect(TokenIdentifier); err != nil {
 			return nil, Error("identifier")

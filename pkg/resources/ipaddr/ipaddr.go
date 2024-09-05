@@ -39,8 +39,8 @@ func appendRange(ips []string, cidr string) []string {
 	// The cidr is validated when the config is loaded.
 	ip, ipnet, _ := net.ParseCIDR(cidr)
 
-	for ip := ip.Mask(ipnet.Mask); ipnet.Contains(ip); ipInc(ip) {
-		ips = append(ips, ip.String())
+	for ipm := ip.Mask(ipnet.Mask); ipnet.Contains(ip); ipInc(ip) {
+		ips = append(ips, ipm.String())
 	}
 
 	return ips[1 : len(ips)-1]

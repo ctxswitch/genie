@@ -52,9 +52,10 @@ func TestParse(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, tt.expected, root.Length())
 		for j, exp := range tt.expected {
-			switch n := exp.(type) {
+			switch n := exp.(type) { //nolint:gocritic
 			case *Expression:
-				got := root.Nodes[j].(*Expression)
+				got, can := root.Nodes[j].(*Expression)
+				assert.True(t, can, "test[%d]: %s", i, tt.input)
 				assert.EqualValues(t, n.Token, got.Token, "test[%d]: %s", i, tt.input)
 				// Get around the inability for testify to compare function pointers.
 				fn1 := runtime.FuncForPC(reflect.ValueOf(n.Filter).Pointer()).Name()

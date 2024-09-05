@@ -7,7 +7,7 @@ import "errors"
 type Func func(any) string
 
 // FilterMap is a map of filter names to filter functions.
-var FilterMap = map[string]Func{
+var FilterMap = map[string]Func{ //nolint:gochecknoglobals
 	"capitalize":  Capitalize,
 	"passthrough": Passthrough,
 }

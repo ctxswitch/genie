@@ -7,7 +7,7 @@ import (
 	"golang.org/x/exp/rand"
 )
 
-// FloatRange is a resource that generates a random float between a minimum
+// FloatRange is a resource that generates a random float between a minimum.
 type FloatRange struct {
 	min          float64
 	max          float64

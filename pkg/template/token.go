@@ -1,6 +1,6 @@
 package template
 
-var builtins = map[string]TokenType{
+var builtins = map[string]TokenType{ //nolint:gochecknoglobals
 	"float_range":   TokenResource,
 	"integer_range": TokenResource,
 	"list":          TokenResource,

@@ -105,7 +105,7 @@ func (n *Expression) WithResources(res *resources.Resources) ExpressionNode {
 }
 func (n *Expression) ExpressionNode() {}
 
-// Probably can consolidate this like we did with expression
+// Probably can consolidate this like we did with expression.
 type LetStatement struct {
 	Token      Token
 	Identifier string

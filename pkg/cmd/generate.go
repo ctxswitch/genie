@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"ctx.sh/genie/pkg/config"
 	"ctx.sh/genie/pkg/events"
@@ -12,13 +14,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var usage = `generate [NAME...] [ARG...]`
-var shortDesc = `Start the generator for one or many events.`
-var longDesc = `
+const (
+	Usage     = `generate [NAME...] [ARG...]`
+	ShortDesc = `Start the generator for one or many events.`
+	LongDesc  = `
 Start the generator for one or many events. By default all configured
 event generators will be run on startup. Individual events can be
 specified by using the event name. Generate specific arguments can
 be added as after the event name.`
+)
 
 // Generate is the command that starts the event generators.
 type Generate struct {
@@ -43,8 +47,8 @@ func NewGenerate(opts *GlobalOpts) *Generate {
 // RunE is the main entry point for the generate command which
 // returns an error.
 func (g *Generate) RunE(cmd *cobra.Command, args []string) error { // nolint:revive
-	ctx, cancel := context.WithCancel(g.ctx)
-	defer cancel()
+	ctx, stop := signal.NotifyContext(g.ctx, os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	if (g.once && !g.enableLogs) || g.disableLogs {
 		g.logger = logr.Discard()
@@ -58,7 +62,7 @@ func (g *Generate) RunE(cmd *cobra.Command, args []string) error { // nolint:rev
 	})
 	if err != nil {
 		g.logger.Error(err, "unable to load configuration")
-		os.Exit(1)
+		return err
 	}
 
 	// TODO: Maybe we can add a start to the sinks struct that will take a
@@ -127,9 +131,9 @@ shutdown:
 // Command returns the cobra command for the generate command.
 func (g *Generate) Command() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   usage,
-		Short: shortDesc,
-		Long:  longDesc,
+		Use:   Usage,
+		Short: ShortDesc,
+		Long:  LongDesc,
 		RunE:  g.RunE,
 		Args:  cobra.MaximumNArgs(1),
 	}

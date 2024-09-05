@@ -46,24 +46,24 @@ func New(cfg Config, opts *Options) *Kafka {
 
 // Init initializes the Kafka sink, setting up the client and checking
 // that the brokers are reachable and the topic exists.
-func (k *Kafka) Init() (err error) {
+func (k *Kafka) Init() (err error) { //nolint:nakedret
 	k.client, err = kgo.NewClient(
 		kgo.SeedBrokers(k.seeds...),
 		kgo.DefaultProduceTopic(k.topic),
 	)
 	if err != nil {
-		return
+		return //nolint:nakedret
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultKafkaTimeout)
 	defer cancel()
 	if err = k.client.Ping(ctx); err != nil {
 		k.logger.Error(err, "failed to ping kafka")
-		return
+		return //nolint:nakedret
 	}
 
 	err = k.createTopic()
-	return
+	return //nolint:nakedret
 }
 
 // createTopic creates the configured topic if it does not already exist.

@@ -15,7 +15,7 @@ type ScopedVariables struct {
 	sync.Mutex
 }
 
-// NewScopedVariables creates a new scoped variables object
+// NewScopedVariables creates a new scoped variables object.
 func NewScopedVariables(v *Variables) *ScopedVariables {
 	vars := make([]*Variables, 0)
 	vars = append(vars, v)

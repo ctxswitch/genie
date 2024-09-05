@@ -19,6 +19,7 @@ vendor/
 
 tmp/
 .venv/
+bin/
 
 # Don't store test certs
 tests/integration/nginx/conf/ssl/ca.*

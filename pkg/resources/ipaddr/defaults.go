@@ -9,5 +9,5 @@ const (
 var (
 	// DefaultIPAddrCidrs is the default list of CIDRs to generate IP addresses
 	// from.
-	DefaultIPAddrCidrs = []string{"192.168.0.0/16"}
+	DefaultIPAddrCidrs = []string{"192.168.0.0/16"} // nolint:gochecknoglobals
 )

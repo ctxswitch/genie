@@ -40,18 +40,18 @@ func (t *Template) CompileFrom(file string) error {
 	// Option 2) If the file is absolute, just use that.
 	var data []byte
 	var err error
-	if filepath.IsAbs(file) {
+	if filepath.IsAbs(file) { // nolint:nestif
 		data, err = os.ReadFile(file)
 		if err != nil {
 			return err
 		}
 		return t.Compile(string(data))
-	} else { // nolint:revive
+	} else {
 		for _, path := range t.paths {
-			file := fmt.Sprintf("%s/%s", path, file)
-			_, err := os.Stat(file)
+			f := fmt.Sprintf("%s/%s", path, file)
+			_, err := os.Stat(f)
 			if err == nil {
-				data, err = os.ReadFile(file)
+				data, err = os.ReadFile(f)
 				if err != nil {
 					return err
 				}
