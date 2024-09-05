@@ -21,7 +21,7 @@ type EventOptions struct {
 }
 
 // Event describes an individual event generator.
-// TODO: revice config to array of events and not map
+// TODO: revice config to array of events and not map.
 type Event struct {
 	name       string
 	generators int

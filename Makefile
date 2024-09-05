@@ -12,28 +12,48 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-deps:
-	@echo "Checking dependencies"
-	@(echo "Installing golangci-lint" && curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.52.2)
+LOCALBIN ?= $(shell pwd)/bin
 
+GOLANGCI_LINT_VERSION ?= v1.60.3
+GOLANGCI_LINT = $(LOCALBIN)/golangci-lint
+
+deps: $(CONTROLLER_GEN) $(KUSTOMIZE) $(GOLANGCI_LINT) $(ADDLICENSE)
+
+$(LOCALBIN):
+	@mkdir -p $(LOCALBIN)
+
+$(GOLANGCI_LINT): $(LOCALBIN)
+	@test -s $(GOLANGCI_LINT) || \
+	GOBIN=$(LOCALBIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION}
+
+.PHONY: verify
 verify: vet test lint
 
-lint:
-	@GO111MODULE=on ${GOPATH}/bin/golangci-lint cache clean
-	@GO111MODULE=on ${GOPATH}/bin/golangci-lint run --timeout=5m --config ./.golangci.yml
+.PHONY: test
+test:
+	go test -race ./... $(GO_VERBOSE) $(GO_COVERPROFILE)
 
+.PHONY: lint
+lint: $(GOLANGCI_LINT)
+	@$(GOLANGCI_LINT) run
+
+.PHONY: lint-fix
+lint-fix: $(GOLANGCI_LINT)
+	@$(GOLANGCI_LINT) run --fix
+
+.PHONY: vet
 vet:
 	@go vet ./...
 
-test:
-	@go test -race ./...
-
+.PHONY: build
 build: verify
 	go build -trimpath --ldflags $(LDFLAGS) -o genie
 
+.PHONY: testcerts
 testcerts:
 	@(cd tests/integration/nginx && ./gen-certs.sh)
 
+.PHONY: testnginx
 testnginx:
 	@docker run --name genie-nginx --rm \
 		--mount type=bind,source=${PWD}/tests/integration/nginx/conf,target=/etc/nginx,readonly \
@@ -42,6 +62,7 @@ testnginx:
 		nginx:latest \
 		nginx -c /etc/nginx/nginx.conf
 
+.PHONY: clean
 clean:
 	@find . -name '*.test' | xargs rm -fv
 	@find . -name '*~' | xargs rm -fv

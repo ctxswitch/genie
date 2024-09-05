@@ -13,7 +13,7 @@ func (t *Config) validate() error {
 	return nil
 }
 
-// UnmarshalYAML implements yaml.Unmarshaler for defaulting the timestamp
+// UnmarshalYAML implements yaml.Unmarshaler for defaulting the timestamp.
 func (t *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type ConfigDefaulted Config
 	var defaults = ConfigDefaulted{

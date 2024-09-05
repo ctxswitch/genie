@@ -39,7 +39,7 @@ func NewLexer(input string) *Lexer {
 	return l
 }
 
-// Come back through and get rid of recursion
+// Come back through and get rid of recursion.
 func (l *Lexer) Next() Token {
 	if l.ch == 0 {
 		return NewToken(TokenEOF, "EOF")
@@ -100,10 +100,10 @@ func (l *Lexer) Next() Token {
 		return l.Next()
 	}
 
-	mode := l.state.Mode()
-	fn, ok := l.scanner[mode]
+	smode := l.state.Mode()
+	fn, ok := l.scanner[smode]
 	if !ok {
-		return NewToken(TokenError, string(mode))
+		return NewToken(TokenError, string(smode))
 	}
 
 	tok, err := fn()
@@ -112,7 +112,6 @@ func (l *Lexer) Next() Token {
 	}
 
 	return tok
-
 }
 
 func (l *Lexer) scanComment() (Token, error) {

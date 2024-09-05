@@ -7,7 +7,7 @@ import (
 	"golang.org/x/exp/rand"
 )
 
-// IntegerRange is a resource that generates a random integer between a minimum
+// IntegerRange is a resource that generates a random integer between a minimum.
 type IntegerRange struct {
 	min          int64
 	max          int64
@@ -63,7 +63,7 @@ func (i *IntegerRange) Get() string {
 			integer = i.max
 		}
 	default:
-		integer = int64(rand.Int63n(i.max-i.min) + i.min)
+		integer = rand.Int63n(i.max-i.min) + i.min
 	}
 
 	// TODO: Move this to strconv and then move padding to a filter and out of the resource.

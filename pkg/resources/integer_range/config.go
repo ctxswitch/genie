@@ -34,7 +34,7 @@ func (i *Config) validate() error {
 	return nil
 }
 
-// UnmarshalYAML implements yaml.Unmarshaler for defaulting the integer_range
+// UnmarshalYAML implements yaml.Unmarshaler for defaulting the integer_range.
 func (i *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type ConfigDefaulted Config
 	var defaults = ConfigDefaulted{

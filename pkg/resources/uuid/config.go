@@ -5,13 +5,13 @@ import (
 	"strings"
 )
 
-// Config is the configuration for the uuid resource
+// Config is the configuration for the uuid resource.
 type Config struct {
 	Type    string `yaml:"type"`
 	Uniques int    `yaml:"uniques"`
 }
 
-// validate ensures the config is valid
+// validate ensures the config is valid.
 func (u *Config) validate() error {
 	if !(u.Type == "uuid1" || u.Type == "uuid4") {
 		return fmt.Errorf("unsupported UUID type %s for uuid", u.Type)

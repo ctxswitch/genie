@@ -93,7 +93,6 @@ uuids:
 	}
 
 	assert.Equal(t, expected, cfg)
-
 }
 
 func TestResourcesEnsureMergeOverwrite(t *testing.T) {
@@ -123,7 +122,6 @@ lists:
 	}
 
 	assert.Equal(t, expected, cfg)
-
 }
 
 func TestDefaultedFloatRange(t *testing.T) {

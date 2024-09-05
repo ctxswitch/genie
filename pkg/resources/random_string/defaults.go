@@ -16,9 +16,9 @@ const (
 
 var (
 	// RandomStringAlphaChars is the set of alpha characters.
-	RandomStringAlphaChars = []rune("abcdefghijklmnopqrstuvwxyz")
+	RandomStringAlphaChars = []rune("abcdefghijklmnopqrstuvwxyz") // nolint:gochecknoglobals
 	// RandomStringAlphaNumChars is the set of alpha numeric characters.
-	RandomStringNumericChars = []rune("1234567890")
+	RandomStringNumericChars = []rune("1234567890") // nolint:gochecknoglobals
 	// RandomStringAlphaNumChars is the set of alpha numeric characters.
-	RandomStringHexChars = []rune("0123456789abcdef")
+	RandomStringHexChars = []rune("0123456789abcdef") // nolint:gochecknoglobals
 )

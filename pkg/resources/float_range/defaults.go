@@ -7,16 +7,16 @@ const (
 	DefaultFloatRangeMin float64 = 0.0
 	// DefaultFloatRangeMax is the default maximum value for the integer_range resource.
 	DefaultFloatRangeMax float64 = 10.0
-	// DefaultFloatRangeDistribution is the default distribution
+	// DefaultFloatRangeDistribution is the default distribution.
 	DefaultFloatRangeDistribution string = "uniform"
-	// DefaultFloatRangeStandardDeviation is the default standard deviation for the normal distribution
+	// DefaultFloatRangeStandardDeviation is the default standard deviation for the normal distribution.
 	DefaultFloatRangeStandardDeviation float64 = 1.0
-	// DefaultFloatRangeMean is the default mean for the normal distribution
+	// DefaultFloatRangeMean is the default mean for the normal distribution.
 	DefaultFloatRangeMean float64 = 0.0
-	// DefaultFloatRangeRate is the default rate of occurences in an interval for the exponential distribution
+	// DefaultFloatRangeRate is the default rate of occurrences in an interval for the exponential distribution.
 	DefaultFloatRangeRate float64 = 1.0
-	// DefaultFloatRangeFormat is the default format for the float_range resource
+	// DefaultFloatRangeFormat is the default format for the float_range resource.
 	DefaultFloatRangeFormat string = "none"
-	// DefaultFloatRangePrecision is the default precision for the float_range resource
+	// DefaultFloatRangePrecision is the default precision for the float_range resource.
 	DefaultFloatRangePrecision int = -1
 )
