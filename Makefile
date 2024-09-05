@@ -53,6 +53,9 @@ vet:
 build: verify
 	go build -trimpath --ldflags $(LDFLAGS) -o genie
 
+$(TARGETDIR):
+	mkdir -p $(TARGETDIR)
+
 .PHONY: build-release
 build-release: $(TARGETDIR) $(GENIE_RELEASE_TARGET)
 
