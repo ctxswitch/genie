@@ -46,7 +46,7 @@ func NewGenerate() *Generate {
 
 // RunE is the main entry point for the generate command which
 // returns an error.
-func (g *Generate) RunE(cmd *cobra.Command, args []string) error { // nolint:revive
+func (g *Generate) RunE(cmd *cobra.Command, args []string) error { // nolint:revive,funlen,gocognit
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
