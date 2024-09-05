@@ -3,15 +3,20 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"ctx.sh/genie/pkg/config"
 	"ctx.sh/genie/pkg/events"
 	"ctx.sh/strata"
 	"github.com/go-logr/logr"
+	"github.com/go-logr/zapr"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 const (
@@ -22,46 +27,84 @@ Start the generator for one or many events. By default all configured
 event generators will be run on startup. Individual events can be
 specified by using the event name. Generate specific arguments can
 be added as after the event name.`
+
+	DefaultMetricsPort = 9090
 )
 
 // Generate is the command that starts the event generators.
 type Generate struct {
-	logger      logr.Logger
-	metrics     *strata.Metrics
 	once        bool
 	enableLogs  bool
 	disableLogs bool
-	ctx         context.Context
 	sink        string
 }
 
 // NewGenerate returns a new Generate command.
-func NewGenerate(opts *GlobalOpts) *Generate {
-	return &Generate{
-		logger:  opts.Logger,
-		metrics: opts.Metrics,
-		ctx:     opts.BaseContext,
-	}
+func NewGenerate() *Generate {
+	return &Generate{}
 }
 
 // RunE is the main entry point for the generate command which
 // returns an error.
 func (g *Generate) RunE(cmd *cobra.Command, args []string) error { // nolint:revive
-	ctx, stop := signal.NotifyContext(g.ctx, os.Interrupt, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	if (g.once && !g.enableLogs) || g.disableLogs {
-		g.logger = logr.Discard()
+	// Logging
+	encoderCfg := zap.NewProductionEncoderConfig()
+	encoderCfg.EncodeTime = zapcore.RFC3339NanoTimeEncoder
+	zapCfg := zap.Config{
+		// TODO: make me configurable
+		Level:       zap.NewAtomicLevelAt(zap.InfoLevel),
+		Development: false,
+		// TODO: enable this for debug mode
+		DisableStacktrace: true,
+		Sampling:          nil,
+		Encoding:          "console",
+		EncoderConfig:     encoderCfg,
+		OutputPaths: []string{
+			"stderr",
+		},
+		ErrorOutputPaths: []string{
+			"stderr",
+		},
 	}
+	zl := zap.Must(zapCfg.Build())
+	defer zl.Sync() //nolint:errcheck
+
+	// Metrics
+	logger := zapr.NewLogger(zl)
+	if (g.once && !g.enableLogs) || g.disableLogs {
+		logger = logr.Discard()
+	}
+
+	metrics := strata.New(strata.MetricsOpts{
+		// Enable later
+		Logger:       logr.Discard(),
+		Prefix:       []string{"genie"},
+		PanicOnError: true,
+	})
+
+	var obs sync.WaitGroup
+	go func() {
+		defer obs.Done()
+		err := metrics.Start(ctx, strata.ServerOpts{
+			Port: DefaultMetricsPort,
+		})
+		if err != nil && err != http.ErrServerClosed {
+			logger.Error(err, "metrics server start failed")
+			os.Exit(1)
+		}
+	}()
 
 	path := cmd.Flag("config").Value.String()
 	cfg, err := config.Load(&config.LoadOptions{
 		Paths:   []string{path},
-		Logger:  g.logger,
-		Metrics: g.metrics,
+		Logger:  logger,
+		Metrics: metrics,
 	})
 	if err != nil {
-		g.logger.Error(err, "unable to load configuration")
+		logger.Error(err, "unable to load configuration")
 		return err
 	}
 
@@ -69,12 +112,12 @@ func (g *Generate) RunE(cmd *cobra.Command, args []string) error { // nolint:rev
 	// name and encasulate the logic below.
 	sink, err := cfg.Sinks.Get(g.sink)
 	if err != nil {
-		g.logger.Error(err, "unable to get sink", "name", g.sink)
+		logger.Error(err, "unable to get sink", "name", g.sink)
 		os.Exit(1)
 	}
 
 	if err := sink.Init(); err != nil {
-		g.logger.Error(err, "unable to initialize sink", "name", g.sink)
+		logger.Error(err, "unable to initialize sink", "name", g.sink)
 		os.Exit(1)
 	}
 
@@ -83,18 +126,18 @@ func (g *Generate) RunE(cmd *cobra.Command, args []string) error { // nolint:rev
 	evt := "all"
 	if len(args) > 0 {
 		if !cfg.HasEvent(args[0]) {
-			g.logger.Error(fmt.Errorf("event %s not found", args[0]), "starting events")
+			logger.Error(fmt.Errorf("event %s not found", args[0]), "starting events")
 			os.Exit(1)
 		}
 		evt = args[0]
 	}
 
 	if !cfg.HasEvents() {
-		g.logger.Error(fmt.Errorf("no events were found in the configuration"), "starting events", "config", path)
+		logger.Error(fmt.Errorf("no events were found in the configuration"), "starting events", "config", path)
 		os.Exit(1)
 	}
 
-	g.logger.Info("starting event generators", "event", evt)
+	logger.Info("starting event generators", "event", evt)
 
 	manager := events.NewManager()
 	// TODO: pull me out into another function.  Right now we start all
@@ -119,12 +162,12 @@ func (g *Generate) RunE(cmd *cobra.Command, args []string) error { // nolint:rev
 	}
 
 	<-ctx.Done()
-	g.logger.Info("shutting down event generators")
+	logger.Info("shutting down event generators")
 	manager.Stop()
 
 shutdown:
 	sink.Stop()
-
+	obs.Wait()
 	return nil
 }
 

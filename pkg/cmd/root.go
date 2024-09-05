@@ -1,40 +1,19 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"os"
 
 	"ctx.sh/genie/pkg/build"
-	"ctx.sh/strata"
-	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
 )
 
-// GlobalOpts are the global options for all commands.
-type GlobalOpts struct {
-	Logger      logr.Logger
-	Metrics     *strata.Metrics
-	BaseContext context.Context
-	CancelFunc  context.CancelFunc
-}
-
 // Root is the root command for the genie CLI.
-type Root struct {
-	logger  logr.Logger
-	metrics *strata.Metrics
-	ctx     context.Context
-	cancel  context.CancelFunc
-}
+type Root struct{}
 
 // NewRoot returns a new root command.
-func NewRoot(opts *GlobalOpts) *Root {
-	return &Root{
-		logger:  opts.Logger,
-		metrics: opts.Metrics,
-		ctx:     opts.BaseContext,
-		cancel:  opts.CancelFunc,
-	}
+func NewRoot() *Root {
+	return &Root{}
 }
 
 // Execute runs the root command.
@@ -60,14 +39,7 @@ values for the testing and validation of event pipelines.`,
 		},
 	}
 
-	// TODO: This needs to change.  Just keep the options around to repass
-	opts := &GlobalOpts{
-		Logger:      r.logger,
-		Metrics:     r.metrics,
-		BaseContext: r.ctx,
-	}
-
-	rootCmd.AddCommand(NewGenerate(opts).Command())
+	rootCmd.AddCommand(NewGenerate().Command())
 	rootCmd.PersistentFlags().StringP("config", "c", "./genie.d", "config file (default is $HOME/.genie.yaml)")
 
 	return rootCmd
