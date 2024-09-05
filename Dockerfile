@@ -20,4 +20,6 @@ RUN : \
   && rm -rf /var/cache/apk/* \
   && :
 RUN update-ca-certificates
+
+USER genie
 CMD ["/bin/genie", "generate", "--config", "/etc/genie.d"]
