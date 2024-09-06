@@ -4,6 +4,21 @@ Genie is an templatable event generator.  It can currently be used to generate p
 
 *Note: This tool is still in very early development stages and could use alot of love in several areas, especially around error handling/notification.  Though changes and enhancements are expected, the template syntax should stay relatively consistent.
 
+## Install
+
+### Homebrew
+
+```
+brew tap ctxsh/keg
+brew install genie
+```
+
+### Docker
+
+```
+docker run -v $(pwd)/myconfigs:/etc/genie.d --rm ctxsh/genie:latest
+```
+
 ## Global Options
 
 * `--config/-c`: Specify the location of the configuration files.  It expects a directory and defaults to `./genie.d`.
