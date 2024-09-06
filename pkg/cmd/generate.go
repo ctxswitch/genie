@@ -86,6 +86,7 @@ func (g *Generate) RunE(cmd *cobra.Command, args []string) error { // nolint:rev
 	})
 
 	var obs sync.WaitGroup
+	obs.Add(1)
 	go func() {
 		defer obs.Done()
 		err := metrics.Start(ctx, strata.ServerOpts{
