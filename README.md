@@ -1,6 +1,6 @@
 # genie
 
-Genie is an templatable event generator.  It can currently be used to generate predicatable structured and non structured events that can be used to mimic interesting business and operational measurements for testing, validation, and benchmarking.  The tool currently offers several templatable resources and outputs to stdout, http, and kafka.  Examples can be found int the [examples directory](examples/).
+Genie is an templatable event generator.  It can currently be used to generate predicatable structured and non structured events that can be used to mimic interesting business and operational measurements for testing, validation, and benchmarking.  The tool currently offers several templatable resources and outputs to stdout, http, and kafka.  Examples can be found in the [examples directory](examples/).
 
 *Note: This tool is still in very early development stages and could use alot of love in several areas, especially around error handling/notification.  Though changes and enhancements are expected, the template syntax should stay relatively consistent.
 
